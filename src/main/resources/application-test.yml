@@ -1,0 +1,38 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+    import: 'aws-parameterstore:'
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${mydb.url}
+    username: ${mydb.username}
+    password: ${mydb.password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+#    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+#        use_sql_comments: true
+logging.level:
+  org.hibernate:
+    SQL: debug
+    type: trace
+
+server:
+  port: 443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-type: PKCS12
+    key-store-password: ${keystore.password}
+
+aws:
+  paramstore:
+    enabled: true
+    prefix: /config
+    profile-separator: _
+    name: saview
