@@ -1,4 +1,31 @@
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2
+  datasource:
+    url: jdbc:h2:mem:test
+  jpa:
+    hibernate:
+      ddl-auto: create  # (1) 스키마 자동 생성
+    #    show-sql: true      # (2) SQL 쿼리 출력
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+#        use_sql_comments: true
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  freemarker:
+    cache: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
   mail:
     host: smtp.gmail.com # SMTP 서버 호스트
     port: 587 # SMTP 서버 포트
@@ -11,13 +38,8 @@ spring:
           timeout: 5000 # Socket Read Timeout 시간(ms) (기본값 : 무한대)
           starttls:
             enable: true # StartTLS 활성화 여부 (기본값 : false)
-  devtools:
-    livereload:
-      enabled: true
-    restart:
-      enabled: true
-  freemarker:
-    cache: false
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
+logging.level:
+  org.hibernate:
+    SQL: info
+    type: info
+

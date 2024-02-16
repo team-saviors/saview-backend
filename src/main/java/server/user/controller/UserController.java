@@ -34,8 +34,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<Void> join(@Valid @RequestBody UserPostDto userPostDto) {
         User user = userService.createUser(userMapper.userPostDtoToUser(userPostDto));
-        Badge badge = userService.createBadge(user);
-        user.setBadge(badge);
 
         return ResponseEntity.created(URI.create("/users/" + user.getUserId())).build();
     }
@@ -76,7 +74,7 @@ public class UserController {
 
     // UserInfo Page Answers
     @GetMapping("/{user-id}/user-answers")
-    public ResponseEntity<UserAnswersResponseDto> UserInfoAnswers(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
+    public ResponseEntity<UserAnswersResponseDto> userInfoAnswers(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
         return ResponseEntity.ok(userMapper.userToUserAnswersResponseDto(findUser, page, size, answerService));
     }
@@ -84,7 +82,7 @@ public class UserController {
 
     // UserInfo Page Comments
     @GetMapping("/{user-id}/user-comments")
-    public ResponseEntity<UserCommentsResponseDto> UserInfoComments(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
+    public ResponseEntity<UserCommentsResponseDto> userInfoComments(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
         return ResponseEntity.ok(userMapper.userToUserCommentsResponseDto(findUser, page, size, commentService));
     }
