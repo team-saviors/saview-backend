@@ -19,7 +19,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -27,31 +26,32 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BadgeRepository badgeRepository;
 
+    @Transactional
     public User createUser(User user) {
         verifyExistsEmail(user.getEmail());
         verifyExistsNickname(user.getNickname());
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setRole("ROLE_USER");
-        user.setProfile("https://saview-dev.s3.ap-northeast-2.amazonaws.com/Saview/logo_circle.png");
+        user.setProfile("/Saview/logo_circle.png");
+        user.setBadge(createBadge(user));
 
         return userRepository.save(user);
     }
 
+    @Transactional
     public Badge createBadge(User user) {
         Badge badge = Badge.builder().score(0).level(1).badgeImg("default img").user(user).build();
 
         return badgeRepository.save(badge);
     }
 
-    public void updatePassword(String email,
-                               String curPassword,
-                               String newPassword) {
+    @Transactional
+    public void updatePassword(String email, String curPassword, String newPassword) {
         User user = findVerifiedUserByEmail(email);
         if (!bCryptPasswordEncoder.matches(curPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "기존 비밀번호와 일치하지 않습니다.");
         }
         user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-        userRepository.save(user);
     }
 
     public User findUser(String email) {
@@ -107,8 +107,8 @@ public class UserService {
             throw new BusinessLogicException(ExceptionCode.DUPLICATE_NICKNAME);
     }
 
-    public void SetTempPassword(String email,
-                               String tempPassword) {
+    public void setTempPassword(String email,
+                                String tempPassword) {
         User user = findVerifiedUserByEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
         userRepository.save(user);
