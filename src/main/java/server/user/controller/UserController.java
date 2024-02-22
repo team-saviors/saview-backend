@@ -2,15 +2,13 @@ package server.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import server.answer.service.AnswerService;
 import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
 import server.user.dto.*;
-import server.user.entity.Badge;
 import server.user.entity.User;
 import server.user.mapper.UserMapper;
 import server.user.service.UserService;
@@ -33,8 +31,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Void> join(@Valid @RequestBody UserPostDto userPostDto) {
-        User user = userService.createUser(userMapper.userPostDtoToUser(userPostDto));
-
+        User user = userService.createUser(userPostDto);
         return ResponseEntity.created(URI.create("/users/" + user.getUserId())).build();
     }
 
@@ -45,30 +42,20 @@ public class UserController {
     }
 
     @PutMapping("/modify")
-    public ResponseEntity<Void> putUser(@Valid @RequestBody UserPutDto userPutDto, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-
-        User user = userMapper.userPutDtoToUser(userPutDto);
-        userService.updateUser(email, user);
+    public ResponseEntity<Void> putUser(@Valid @RequestBody UserPutDto userPutDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.updateUser(principalDetails.getUsername(), userPutDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteUser(Authentication authentication) {
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-        String email = principalDetails.getUsername();
-
-        userService.deleteUser(email);
-
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.deleteUser(principalDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> putPassword(@Valid @RequestBody PasswordDto passwordDto, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-        userService.updatePassword(email, passwordDto.getCurPassword(), passwordDto.getNewPassword());
+    public ResponseEntity<Void> putPassword(@Valid @RequestBody PasswordDto passwordDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.updatePassword(principalDetails.getUsername(), passwordDto.getCurPassword(), passwordDto.getNewPassword());
         return ResponseEntity.ok().build();
     }
 

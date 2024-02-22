@@ -4,21 +4,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
+import server.user.dto.UserPostDto;
+import server.user.dto.UserPutDto;
 import server.user.entity.Badge;
 import server.user.entity.RefreshToken;
 import server.user.entity.User;
+import server.user.mapper.UserMapper;
 import server.user.repository.BadgeRepository;
 import server.user.repository.RefreshTokenRepository;
 import server.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -26,26 +30,31 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BadgeRepository badgeRepository;
 
-    @Transactional
-    public User createUser(User user) {
-        verifyExistsEmail(user.getEmail());
-        verifyExistsNickname(user.getNickname());
+    private final UserMapper userMapper;
+
+    public User createUser(UserPostDto userPostDto) {
+        // 초기에 도메인 변환 필수(규칙)
+        User user = userMapper.userPostDtoToUser(userPostDto);
+
+        checkDuplicationInfo(user);
+
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRole("ROLE_USER");
-        user.setProfile("/Saview/logo_circle.png");
         user.setBadge(createBadge(user));
+        user.setDefaultInfo();
 
         return userRepository.save(user);
     }
 
-    @Transactional
+    private void checkDuplicationInfo(User user) {
+        verifyExistsEmail(user.getEmail());
+        verifyExistsNickname(user.getNickname());
+    }
+
     public Badge createBadge(User user) {
         Badge badge = Badge.builder().score(0).level(1).badgeImg("default img").user(user).build();
-
         return badgeRepository.save(badge);
     }
 
-    @Transactional
     public void updatePassword(String email, String curPassword, String newPassword) {
         User user = findVerifiedUserByEmail(email);
         if (!bCryptPasswordEncoder.matches(curPassword, user.getPassword())) {
@@ -71,11 +80,10 @@ public class UserService {
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void updateUser(String email, User user) {
-        User findUser = findVerifiedUserByEmail(email);
-        findUser.setNickname(user.getNickname());
-        findUser.setProfile(user.getProfile());
-        userRepository.save(findUser);
+    public void updateUser(String email, UserPutDto userPutDto) {
+        User user = userRepository.findByEmail(email);
+        user.setNickname(userPutDto.getNickname());
+        user.setProfile(userPutDto.getProfile());
     }
 
     public void deleteUser(String email) {
@@ -111,6 +119,5 @@ public class UserService {
                                 String tempPassword) {
         User user = findVerifiedUserByEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
-        userRepository.save(user);
     }
 }

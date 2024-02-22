@@ -62,8 +62,9 @@ class UserControllerTest {
                 .email("test@gmail.com")
                 .nickname("testing")
                 .password("test1234!").build();
+        // TODO: 세줄중에 위에 필요한지 확인
         given(userMapper.userPostDtoToUser(Mockito.any(UserPostDto.class))).willReturn(new User());
-        given(userService.createUser(Mockito.any(User.class))).willReturn(new User());
+        given(userService.createUser(Mockito.any(UserPostDto.class))).willReturn(new User());
         given(userService.createBadge(Mockito.any(User.class))).willReturn(Badge.builder().build());
 
         String content = gson.toJson(userPostDto);

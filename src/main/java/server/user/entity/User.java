@@ -3,7 +3,6 @@ package server.user.entity;
 import lombok.Getter;
 import lombok.Setter;
 import server.answer.entity.Answer;
-
 import server.audit.Auditable;
 import server.comment.entity.Comment;
 import server.question.entity.Question;
@@ -51,15 +50,20 @@ public class User extends Auditable {
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Badge badge;
 
+    @Getter
     public enum UserStatus {
         USER_ACTIVE("활동중"),
         USER_QUIT("탈퇴 상태");
 
-        @Getter
         private final String status;
 
         UserStatus(String status) {
             this.status = status;
         }
+    }
+
+    public void setDefaultInfo() {
+        this.role = "ROLE_USER";
+        this.profile = "/Saview/logo_circle.png";
     }
 }
