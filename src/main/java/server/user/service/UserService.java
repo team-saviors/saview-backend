@@ -33,26 +33,28 @@ public class UserService {
     private final UserMapper userMapper;
 
     public User createUser(UserPostDto userPostDto) {
-        // 초기에 도메인 변환 필수(규칙)
-        User user = userMapper.userPostDtoToUser(userPostDto);
+        // 초기에 도메인 변환 필수(규칙) -> 이부분은 변환을 할 필요가 없어보임
+//        User user = userMapper.userPostDtoToUser(userPostDto);
 
-        checkDuplicationInfo(user);
+        checkDuplicationInfo(userPostDto);
 
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setBadge(createBadge(user));
-        user.setDefaultInfo();
+        User newUser = User.builder()
+            .nickname(userPostDto.getNickname())
+            .email(userPostDto.getEmail())
+            .password(bCryptPasswordEncoder.encode(userPostDto.getPassword()))
+            .build();
 
-        return userRepository.save(user);
+        newUser.initBadge(createBadge(newUser));
+        return userRepository.save(newUser);
     }
 
-    private void checkDuplicationInfo(User user) {
-        verifyExistsEmail(user.getEmail());
-        verifyExistsNickname(user.getNickname());
+    private void checkDuplicationInfo(UserPostDto userPostDto) {
+        verifyExistsEmail(userPostDto.getEmail());
+        verifyExistsNickname(userPostDto.getNickname());
     }
 
     public Badge createBadge(User user) {
-        Badge badge = Badge.builder().score(0).level(1).badgeImg("default img").user(user).build();
-        return badgeRepository.save(badge);
+        return badgeRepository.save(new Badge(user));
     }
 
     public void updatePassword(String email, String curPassword, String newPassword) {
@@ -60,7 +62,7 @@ public class UserService {
         if (!bCryptPasswordEncoder.matches(curPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "기존 비밀번호와 일치하지 않습니다.");
         }
-        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        user.changePassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
     public User findUser(String email) {
@@ -69,9 +71,7 @@ public class UserService {
 
     public User findUserById(long userId) {
         User user = findVerifiedUser(userId);
-        if (user.getUserStatus().equals(User.UserStatus.USER_QUIT)) {
-            throw new BusinessLogicException(ExceptionCode.QUIT_USER);
-        }
+        user.checkQuitUser();
         return user;
     }
 
@@ -82,13 +82,12 @@ public class UserService {
 
     public void updateUser(String email, UserPutDto userPutDto) {
         User user = userRepository.findByEmail(email);
-        user.setNickname(userPutDto.getNickname());
-        user.setProfile(userPutDto.getProfile());
+        user.updateNicknameAndProfile(userPutDto);
     }
 
     public void deleteUser(String email) {
         User findUser = findVerifiedUserByEmail(email);
-        findUser.setUserStatus(User.UserStatus.USER_QUIT);
+        findUser.quitUser();
         refreshTokenRepository.deleteByEmail(email);
     }
 
@@ -118,6 +117,6 @@ public class UserService {
     public void setTempPassword(String email,
                                 String tempPassword) {
         User user = findVerifiedUserByEmail(email);
-        user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
+        user.changePassword(bCryptPasswordEncoder.encode(tempPassword));
     }
 }

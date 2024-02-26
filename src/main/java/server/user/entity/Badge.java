@@ -1,6 +1,9 @@
 package server.user.entity;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -26,11 +29,7 @@ public class Badge {
     @JoinColumn(name = "USER_ID")
     private User user;
 
-    @Builder
-    public Badge(int score, int level, String badgeImg,User user) {
-        this.score = score;
-        this.level = level;
-        this.badgeImg = badgeImg;
+    public Badge(User user) {
         this.user = user;
     }
 }
