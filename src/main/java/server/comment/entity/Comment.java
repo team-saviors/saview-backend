@@ -11,14 +11,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import server.answer.entity.Answer;
 import server.audit.Auditable;
 import server.user.entity.User;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment extends Auditable {
 
@@ -38,9 +36,13 @@ public class Comment extends Auditable {
     private User user;
 
     @Builder
-    public Comment(String content, Answer answer, User user) {
+    private Comment(String content, Answer answer, User user) {
         this.content = content;
         this.answer = answer;
         this.user = user;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
     }
 }

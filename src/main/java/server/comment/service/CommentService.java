@@ -37,6 +37,7 @@ public class CommentService {
     public Long createdComment(CommentPostPutDto commentDto, Long answerId, String email) {
         User user = Optional.ofNullable(userRepository.findByEmail(email))
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
+        user.addBadgeScore(COMMENT_BADGE_SCORE);
 
         Comment comment = Comment.builder()
                 .content(commentDto.getContent())
@@ -44,16 +45,14 @@ public class CommentService {
                 .answer(user.findAnswerByAnswerId(answerId))
                 .build();
 
-        user.addBadgeScore(COMMENT_BADGE_SCORE);
         commentRepository.save(comment);
 
         return comment.getCommentId();
     }
 
-    public void updateComment(Comment comment) {
-        Comment findComment = findVerifiedComment(comment.getCommentId());
-        findComment.setContent(comment.getContent());
-        commentRepository.save(findComment);
+    public void updateComment(Long commentId, CommentPostPutDto commentDto) {
+        Comment comment = findVerifiedComment(commentId);
+        comment.updateContent(commentDto.getContent());
     }
 
     public void deleteComment(long commentId) {
@@ -61,9 +60,9 @@ public class CommentService {
         commentRepository.delete(findComment);
     }
 
-    public Comment findVerifiedComment(long commentId) {
-        Optional<Comment> comment = commentRepository.findById(commentId);
-        return comment.orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
+    private Comment findVerifiedComment(long commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 
     public List<CommentResponseDto> findComments(Answer answer, UserMapper userMapper) {
