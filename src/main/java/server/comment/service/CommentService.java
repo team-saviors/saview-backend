@@ -46,7 +46,6 @@ public class CommentService {
                 .build();
 
         commentRepository.save(comment);
-
         return comment.getCommentId();
     }
 

@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import server.answer.entity.Answer;
 import server.audit.Auditable;
+import server.exception.BusinessLogicException;
+import server.exception.ExceptionCode;
 import server.user.entity.User;
 
 @Entity
@@ -43,6 +45,10 @@ public class Comment extends Auditable {
     }
 
     public void updateContent(String content) {
+        if (content.isEmpty() || content.isBlank()) {
+            throw new BusinessLogicException(ExceptionCode.BLANK_CONTENT);
+        }
+
         this.content = content;
     }
 }
