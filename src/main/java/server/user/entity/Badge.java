@@ -1,8 +1,17 @@
 package server.user.entity;
 
-import lombok.*;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -27,10 +36,14 @@ public class Badge {
     private User user;
 
     @Builder
-    public Badge(int score, int level, String badgeImg,User user) {
+    public Badge(int score, int level, String badgeImg, User user) {
         this.score = score;
         this.level = level;
         this.badgeImg = badgeImg;
         this.user = user;
+    }
+
+    public void addScore(int addValue) {
+        this.score += addValue;
     }
 }

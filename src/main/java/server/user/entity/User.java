@@ -6,6 +6,8 @@ import server.answer.entity.Answer;
 
 import server.audit.Auditable;
 import server.comment.entity.Comment;
+import server.exception.BusinessLogicException;
+import server.exception.ExceptionCode;
 import server.question.entity.Question;
 
 import javax.persistence.*;
@@ -61,5 +63,16 @@ public class User extends Auditable {
         UserStatus(String status) {
             this.status = status;
         }
+    }
+
+    public Answer findAnswerByAnswerId(Long answerId) {
+        return answers.stream()
+                .filter(answer -> answerId.equals(answer.getAnswerId()))
+                .findAny()
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
+    }
+
+    public void addBadgeScore(int addValue) {
+        this.badge.addScore(addValue);
     }
 }

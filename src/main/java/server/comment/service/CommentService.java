@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.answer.entity.Answer;
+import server.comment.dto.CommentPostPutDto;
 import server.comment.dto.CommentResponseDto;
 import server.comment.entity.Comment;
 import server.comment.mapper.CommentMapper;
@@ -18,22 +19,35 @@ import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.response.AnswerCommentUserResponseDto;
 import server.response.MultiResponseDto;
-import server.user.entity.Badge;
 import server.user.entity.User;
 import server.user.mapper.UserMapper;
-import server.user.repository.BadgeRepository;
+import server.user.repository.UserRepository;
 
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class CommentService {
 
+    public static final int COMMENT_BADGE_SCORE = 10;
+
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final BadgeRepository badgeRepository;
+    private final UserRepository userRepository;
 
-    public Long createdComment(Comment comment) {
-        return commentRepository.save(comment).getCommentId();
+    public Long createdComment(CommentPostPutDto commentDto, Long answerId, String email) {
+        User user = Optional.ofNullable(userRepository.findByEmail(email))
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
+
+        Comment comment = Comment.builder()
+                .content(commentDto.getContent())
+                .user(user)
+                .answer(user.findAnswerByAnswerId(answerId))
+                .build();
+
+        user.addBadgeScore(COMMENT_BADGE_SCORE);
+        commentRepository.save(comment);
+
+        return comment.getCommentId();
     }
 
     public void updateComment(Comment comment) {
@@ -67,10 +81,5 @@ public class CommentService {
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
         List<Comment> comments = pageComments.getContent();
         return new MultiResponseDto<>(commentMapper.commentsToAnswerCommentUserResponseDtos(comments), pageComments);
-    }
-
-    public void addCommentScore(Badge badge) {
-        int score = badge.getScore();
-        badgeRepository.updateScore(score + 10, badge.getBadgeId());
     }
 }

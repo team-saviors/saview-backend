@@ -13,14 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import server.answer.service.AnswerService;
 import server.comment.dto.CommentPostPutDto;
 import server.comment.entity.Comment;
 import server.comment.mapper.CommentMapper;
 import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
-import server.user.entity.User;
-import server.user.service.UserService;
 
 @Validated
 @RequiredArgsConstructor
@@ -29,20 +26,13 @@ public class CommentController {
 
     private final CommentService commentService;
     private final CommentMapper commentMapper;
-    private final AnswerService answerService;
-    private final UserService userService;
 
     @PostMapping("/answers/{answer-id}/comments")
     public ResponseEntity<Void> postComment(@Positive @PathVariable("answer-id") long answerId,
                                             @Valid @RequestBody CommentPostPutDto commentPostPutDto,
                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        Comment comment = commentMapper.commentPostPutDtoToComment(commentPostPutDto);
-        comment.setAnswer(answerService.findVerifiedAnswer(answerId));
-        User user = userService.findUser(principalDetails.getUsername());
-        commentService.addCommentScore(user.getBadge());
-        comment.setUser(user);
-
-        final Long commentId = commentService.createdComment(comment);
+        final Long commentId = commentService.createdComment(commentPostPutDto, answerId,
+                principalDetails.getUsername());
 
         return ResponseEntity.created(URI.create("/comments/" + commentId)).build();
     }
