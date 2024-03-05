@@ -8,7 +8,6 @@ import server.comment.entity.Comment;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
-import server.user.dto.UserPutDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -78,9 +77,9 @@ public class User extends Auditable {
         }
     }
 
-    public void updateNicknameAndProfile(UserPutDto userPutDto) {
-        nickname = userPutDto.getNickname();
-        profile = userPutDto.getProfile();
+    public void updateNicknameAndProfile(String nickname, String profile) {
+        this.nickname = nickname;
+        this.profile = profile;
     }
 
     public void initBadge(Badge badge) {
@@ -91,7 +90,7 @@ public class User extends Auditable {
         this.password = password;
     }
 
-    public void quitUser() {
-        userStatus = USER_QUIT;
+    public void updateStatus(UserStatus status) {
+        userStatus = status;
     }
 }

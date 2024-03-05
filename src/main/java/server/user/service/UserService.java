@@ -13,12 +13,13 @@ import server.user.dto.UserPutDto;
 import server.user.entity.Badge;
 import server.user.entity.RefreshToken;
 import server.user.entity.User;
-import server.user.mapper.UserMapper;
 import server.user.repository.BadgeRepository;
 import server.user.repository.RefreshTokenRepository;
 import server.user.repository.UserRepository;
 
 import java.util.Optional;
+
+import static server.user.entity.User.UserStatus.USER_QUIT;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +31,7 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BadgeRepository badgeRepository;
 
-    private final UserMapper userMapper;
-
     public User createUser(UserPostDto userPostDto) {
-        // 초기에 도메인 변환 필수(규칙) -> 이부분은 변환을 할 필요가 없어보임
-//        User user = userMapper.userPostDtoToUser(userPostDto);
-
         checkDuplicationInfo(userPostDto);
 
         User newUser = User.builder()
@@ -82,12 +78,12 @@ public class UserService {
 
     public void updateUser(String email, UserPutDto userPutDto) {
         User user = userRepository.findByEmail(email);
-        user.updateNicknameAndProfile(userPutDto);
+        user.updateNicknameAndProfile(userPutDto.getNickname(),userPutDto.getProfile());
     }
 
     public void deleteUser(String email) {
         User findUser = findVerifiedUserByEmail(email);
-        findUser.quitUser();
+        findUser.updateStatus(USER_QUIT);
         refreshTokenRepository.deleteByEmail(email);
     }
 
