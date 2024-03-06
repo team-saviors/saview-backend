@@ -106,13 +106,6 @@ public class User extends Auditable {
         userStatus = status;
     }
 
-    public Answer findAnswerByAnswerId(Long answerId) {
-        return answers.stream()
-                .filter(answer -> answerId.equals(answer.getAnswerId()))
-                .findAny()
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
-    }
-
     public void addBadgeScore(int addValue) {
         this.badge.addScore(addValue);
     }

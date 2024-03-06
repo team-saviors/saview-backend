@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.answer.entity.Answer;
+import server.answer.service.AnswerService;
 import server.comment.dto.CommentPostPutDto;
 import server.comment.dto.CommentResponseDto;
 import server.comment.entity.Comment;
@@ -33,6 +34,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final UserRepository userRepository;
+    private final AnswerService answerService;
 
     public Long createdComment(CommentPostPutDto commentDto, Long answerId, String email) {
         User user = Optional.ofNullable(userRepository.findByEmail(email))
@@ -42,7 +44,7 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .content(commentDto.getContent())
                 .user(user)
-                .answer(user.findAnswerByAnswerId(answerId))
+                .answer(answerService.findVerifiedAnswer(answerId))
                 .build();
 
         commentRepository.save(comment);
