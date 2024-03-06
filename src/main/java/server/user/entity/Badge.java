@@ -35,11 +35,15 @@ public class Badge {
     @JoinColumn(name = "USER_ID")
     private User user;
 
+
     @Builder
     public Badge(int score, int level, String badgeImg, User user) {
         this.score = score;
         this.level = level;
         this.badgeImg = badgeImg;
+    }
+
+    public Badge(User user) {
         this.user = user;
     }
 

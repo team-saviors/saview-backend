@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
+import server.user.dto.UserPostDto;
+import server.user.dto.UserPutDto;
 import server.user.entity.Badge;
 import server.user.entity.RefreshToken;
 import server.user.entity.User;
@@ -14,11 +17,13 @@ import server.user.repository.BadgeRepository;
 import server.user.repository.RefreshTokenRepository;
 import server.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
+
+import static server.user.entity.User.UserStatus.USER_QUIT;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -26,32 +31,34 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BadgeRepository badgeRepository;
 
-    @Transactional
-    public User createUser(User user) {
-        verifyExistsEmail(user.getEmail());
-        verifyExistsNickname(user.getNickname());
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRole("ROLE_USER");
-        user.setProfile("/Saview/logo_circle.png");
-        user.setBadge(createBadge(user));
+    public User createUser(UserPostDto userPostDto) {
+        checkDuplicationInfo(userPostDto);
 
-        return userRepository.save(user);
+        User newUser = User.builder()
+            .nickname(userPostDto.getNickname())
+            .email(userPostDto.getEmail())
+            .password(bCryptPasswordEncoder.encode(userPostDto.getPassword()))
+            .build();
+
+        newUser.initBadge(createBadge(newUser));
+        return userRepository.save(newUser);
     }
 
-    @Transactional
+    private void checkDuplicationInfo(UserPostDto userPostDto) {
+        verifyExistsEmail(userPostDto.getEmail());
+        verifyExistsNickname(userPostDto.getNickname());
+    }
+
     public Badge createBadge(User user) {
-        Badge badge = Badge.builder().score(0).level(1).badgeImg("default img").user(user).build();
-
-        return badgeRepository.save(badge);
+        return badgeRepository.save(new Badge(user));
     }
 
-    @Transactional
     public void updatePassword(String email, String curPassword, String newPassword) {
         User user = findVerifiedUserByEmail(email);
         if (!bCryptPasswordEncoder.matches(curPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "기존 비밀번호와 일치하지 않습니다.");
         }
-        user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+        user.changePassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
     public User findUser(String email) {
@@ -60,9 +67,7 @@ public class UserService {
 
     public User findUserById(long userId) {
         User user = findVerifiedUser(userId);
-        if (user.getUserStatus().equals(User.UserStatus.USER_QUIT)) {
-            throw new BusinessLogicException(ExceptionCode.QUIT_USER);
-        }
+        user.checkQuitUser();
         return user;
     }
 
@@ -71,16 +76,14 @@ public class UserService {
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void updateUser(String email, User user) {
-        User findUser = findVerifiedUserByEmail(email);
-        findUser.setNickname(user.getNickname());
-        findUser.setProfile(user.getProfile());
-        userRepository.save(findUser);
+    public void updateUser(String email, UserPutDto userPutDto) {
+        User user = userRepository.findByEmail(email);
+        user.updateNicknameAndProfile(userPutDto.getNickname(),userPutDto.getProfile());
     }
 
     public void deleteUser(String email) {
         User findUser = findVerifiedUserByEmail(email);
-        findUser.setUserStatus(User.UserStatus.USER_QUIT);
+        findUser.updateStatus(USER_QUIT);
         refreshTokenRepository.deleteByEmail(email);
     }
 
@@ -110,7 +113,6 @@ public class UserService {
     public void setTempPassword(String email,
                                 String tempPassword) {
         User user = findVerifiedUserByEmail(email);
-        user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
-        userRepository.save(user);
+        user.changePassword(bCryptPasswordEncoder.encode(tempPassword));
     }
 }
