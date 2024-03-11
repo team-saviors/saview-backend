@@ -1,7 +1,25 @@
 package server.user.entity;
 
+import static server.user.entity.User.UserStatus.USER_ACTIVE;
+import static server.user.entity.User.UserStatus.USER_QUIT;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import server.answer.entity.Answer;
 import server.audit.Auditable;
 import server.comment.entity.Comment;
@@ -9,16 +27,10 @@ import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static server.user.entity.User.UserStatus.USER_ACTIVE;
-import static server.user.entity.User.UserStatus.USER_QUIT;
-
 @Entity
 @Getter
 @Table(name = "USER_TABLE")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -92,5 +104,9 @@ public class User extends Auditable {
 
     public void updateStatus(UserStatus status) {
         userStatus = status;
+    }
+
+    public void addBadgeScore(int addValue) {
+        this.badge.addScore(addValue);
     }
 }

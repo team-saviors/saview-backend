@@ -1,19 +1,16 @@
 package server.comment.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.mapstruct.Mapper;
-import server.comment.dto.CommentPostPutDto;
 import server.comment.dto.CommentResponseDto;
 import server.comment.entity.Comment;
 import server.response.AnswerCommentUserResponseDto;
 import server.user.mapper.UserMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
-    Comment commentPostPutDtoToComment(CommentPostPutDto commentPostPutDto);
 
     default CommentResponseDto commentToCommentResponseDto(Comment comment,
                                                            UserMapper userMapper) {
@@ -41,13 +38,13 @@ public interface CommentMapper {
     }
 
     default List<AnswerCommentUserResponseDto> commentsToAnswerCommentUserResponseDtos(List<Comment> comments) {
-        if ( comments == null ) {
+        if (comments == null) {
             return null;
         }
 
         List<AnswerCommentUserResponseDto> list = new ArrayList<>(comments.size());
-        for ( Comment comment : comments ) {
-            list.add( commentToAnswerCommentUserResponseDto( comment) );
+        for (Comment comment : comments) {
+            list.add(commentToAnswerCommentUserResponseDto(comment));
         }
 
         return list;
