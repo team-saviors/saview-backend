@@ -18,9 +18,7 @@ import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
 import server.question.service.QuestionService;
 import server.user.entity.User;
-import server.user.mapper.UserMapper;
 import server.user.service.UserService;
-
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -36,8 +34,6 @@ public class AnswerController {
     private final QuestionService questionService;
     private final UserService userService;
     private final CommentService commentService;
-    private final UserMapper userMapper;
-
 
     @PostMapping("/questions/{question-id}/answers")
     public ResponseEntity<Void> postAnswer(@Positive @PathVariable("question-id") long questionId,
@@ -89,7 +85,7 @@ public class AnswerController {
     public ResponseEntity<AnswerResponseDto> test(@PathVariable("answer-id") long answerId) {
         Answer answer = answerService.findVerifiedAnswer(answerId);
 
-        return ResponseEntity.ok(answerMapper.answerToAnswerResponseDto(answer, userMapper, commentService));
+        return ResponseEntity.ok(answerMapper.answerToAnswerResponseDto(answer, commentService));
     }
 
 

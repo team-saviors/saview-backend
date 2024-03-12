@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
-import server.user.dto.UserPostDto;
-import server.user.dto.UserPutDto;
+import server.user.dto.request.UserPostRequest;
+import server.user.dto.request.UserPutRequest;
 import server.user.entity.Badge;
 import server.user.entity.RefreshToken;
 import server.user.entity.User;
@@ -31,20 +31,16 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final BadgeRepository badgeRepository;
 
-    public User createUser(UserPostDto userPostDto) {
+    public User createUser(UserPostRequest userPostDto) {
         checkDuplicationInfo(userPostDto);
 
-        User newUser = User.builder()
-            .nickname(userPostDto.getNickname())
-            .email(userPostDto.getEmail())
-            .password(bCryptPasswordEncoder.encode(userPostDto.getPassword()))
-            .build();
-
+        User newUser = userPostDto.toEntity(bCryptPasswordEncoder.encode(userPostDto.getPassword()));
         newUser.initBadge(createBadge(newUser));
+
         return userRepository.save(newUser);
     }
 
-    private void checkDuplicationInfo(UserPostDto userPostDto) {
+    private void checkDuplicationInfo(UserPostRequest userPostDto) {
         verifyExistsEmail(userPostDto.getEmail());
         verifyExistsNickname(userPostDto.getNickname());
     }
@@ -76,9 +72,9 @@ public class UserService {
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void updateUser(String email, UserPutDto userPutDto) {
+    public void updateUser(String email, UserPutRequest userPutRequest) {
         User user = userRepository.findByEmail(email);
-        user.updateNicknameAndProfile(userPutDto.getNickname(),userPutDto.getProfile());
+        user.updateNicknameAndProfile(userPutRequest.getNickname(), userPutRequest.getProfile());
     }
 
     public void deleteUser(String email) {

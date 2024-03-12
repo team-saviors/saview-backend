@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class AnswerCommentUserResponseDto {
+public class AnswerCommentUserResponse {
     private long questionId;
     private String questionContent;
     private String subCategory;
-    private LocalDateTime CreatedAt;
+    private LocalDateTime createdAt;
     private String content;
 }

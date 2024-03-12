@@ -7,8 +7,7 @@ import server.question.dto.QuestionPostPutDto;
 import server.question.dto.QuestionResponseDto;
 import server.question.dto.QuestionsResponseDto;
 import server.question.entity.Question;
-import server.user.mapper.UserMapper;
-
+import server.user.dto.response.UserProfileResponse;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,8 +18,7 @@ public interface QuestionMapper {
     Question questionPostPutDtoToQuestion(QuestionPostPutDto questionPostPutDto);
 
 
-    default QuestionsResponseDto questionToQuestionsResponseDto(Question question,
-                                                                  UserMapper userMapper) {
+    default QuestionsResponseDto questionToQuestionsResponseDto(Question question) {
         if ( question == null ) {
             return null;
         }
@@ -32,15 +30,14 @@ public interface QuestionMapper {
         questionsResponseDto.setSubCategory(question.getSubCategory());
         questionsResponseDto.setViews(question.getViews());
         questionsResponseDto.setAnswerNum(question.getAnswers().size());
-        questionsResponseDto.setUser(userMapper.userToUserProfileResponseDto(question.getUser()));
+        questionsResponseDto.setUser(UserProfileResponse.from(question.getUser()));
         questionsResponseDto.setCreatedAt(question.getCreatedAt());
         questionsResponseDto.setModifiedAt(question.getModifiedAt());
 
         return questionsResponseDto;
     }
 
-    default List<QuestionsResponseDto> questionsToQuestionsResponseDtos(List<Question> questions,
-                                                                        UserMapper userMapper) {
+    default List<QuestionsResponseDto> questionsToQuestionsResponseDtos(List<Question> questions) {
         if (questions == null) {
             return null;
         } else {
@@ -49,7 +46,7 @@ public interface QuestionMapper {
 
             while(var3.hasNext()) {
                 Question question = (Question)var3.next();
-                list.add(this.questionToQuestionsResponseDto(question, userMapper));
+                list.add(this.questionToQuestionsResponseDto(question));
             }
 
             return list;
@@ -58,7 +55,6 @@ public interface QuestionMapper {
 
     // 1개의 Question 반환을 위한 mapper
     default QuestionResponseDto questionToQuestionResponseDto(Question question,
-                                                              UserMapper userMapper,
                                                               AnswerService answerService,
                                                               CommentService commentService,
                                                               int page, int size, String sort) {
@@ -69,8 +65,8 @@ public interface QuestionMapper {
         questionResponseDto.setViews(question.getViews());
         questionResponseDto.setMainCategory(question.getMainCategory());
         questionResponseDto.setSubCategory(question.getSubCategory());
-        questionResponseDto.setUser(userMapper.userToUserProfileResponseDto(question.getUser()));
-        questionResponseDto.setAnswers(answerService.findAnswers(question, userMapper, commentService, page, size, sort));
+        questionResponseDto.setUser(UserProfileResponse.from(question.getUser()));
+        questionResponseDto.setAnswers(answerService.findAnswers(question, commentService, page, size, sort));
 
         return questionResponseDto;
     }

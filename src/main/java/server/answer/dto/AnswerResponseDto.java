@@ -3,7 +3,7 @@ package server.answer.dto;
 import lombok.Getter;
 import lombok.Setter;
 import server.comment.dto.CommentResponseDto;
-import server.user.dto.UserProfileResponseDto;
+import server.user.dto.response.UserProfileResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +16,6 @@ public class AnswerResponseDto {
     private int votes;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private UserProfileResponseDto user;
+    private UserProfileResponse user;
     private List<CommentResponseDto> comments;
 }

@@ -5,8 +5,8 @@ import server.answer.dto.AnswerPostPutDto;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.entity.Answer;
 import server.comment.service.CommentService;
-import server.response.AnswerCommentUserResponseDto;
-import server.user.mapper.UserMapper;
+import server.response.AnswerCommentUserResponse;
+import server.user.dto.response.UserProfileResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,6 @@ public interface AnswerMapper {
 
     Answer answerPostPutDtoToAnswer(AnswerPostPutDto answerPostPutDto);
     default List<AnswerResponseDto> answersToAnswersResponseDtos(List<Answer> answers,
-                                                                 UserMapper userMapper,
                                                                  CommentService commentService) {
         if ( answers == null ) {
             return null;
@@ -25,7 +24,7 @@ public interface AnswerMapper {
 
         List<AnswerResponseDto> list = new ArrayList<>(answers.size());
         for ( Answer answer : answers ) {
-            list.add( answerToAnswerResponseDto( answer, userMapper, commentService ) );
+            list.add( answerToAnswerResponseDto( answer, commentService ) );
         }
 
         return list;
@@ -33,7 +32,6 @@ public interface AnswerMapper {
 
 
     default AnswerResponseDto answerToAnswerResponseDto(Answer answer,
-                                                        UserMapper userMapper,
                                                         CommentService commentService) {
         AnswerResponseDto answerResponseDto = new AnswerResponseDto();
 
@@ -43,32 +41,32 @@ public interface AnswerMapper {
         answerResponseDto.setContent(answer.getContent());
         answerResponseDto.setVotes(answer.getVotes());
 
-        answerResponseDto.setUser(userMapper.userToUserProfileResponseDto(answer.getUser()));
+        answerResponseDto.setUser(UserProfileResponse.from(answer.getUser()));
 
-        answerResponseDto.setComments(commentService.findComments(answer, userMapper));
+        answerResponseDto.setComments(commentService.findComments(answer));
 
         return answerResponseDto;
     }
 
-    default AnswerCommentUserResponseDto answerToAnswerCommentUserResponseDto(Answer answer) {
-        AnswerCommentUserResponseDto answerCommentUserResponseDto = new AnswerCommentUserResponseDto();
+    default AnswerCommentUserResponse answerToAnswerCommentUserResponseDto(Answer answer) {
+        AnswerCommentUserResponse answerCommentUserResponse = new AnswerCommentUserResponse();
 
-        answerCommentUserResponseDto.setQuestionId(answer.getQuestion().getQuestionId());
-        answerCommentUserResponseDto.setQuestionContent(answer.getQuestion().getContent());
-        answerCommentUserResponseDto.setSubCategory(answer.getQuestion().getSubCategory());
+        answerCommentUserResponse.setQuestionId(answer.getQuestion().getQuestionId());
+        answerCommentUserResponse.setQuestionContent(answer.getQuestion().getContent());
+        answerCommentUserResponse.setSubCategory(answer.getQuestion().getSubCategory());
 
-        answerCommentUserResponseDto.setCreatedAt(answer.getCreatedAt());
-        answerCommentUserResponseDto.setContent(answer.getContent());
+        answerCommentUserResponse.setCreatedAt(answer.getCreatedAt());
+        answerCommentUserResponse.setContent(answer.getContent());
 
-        return answerCommentUserResponseDto;
+        return answerCommentUserResponse;
     }
 
-    default List<AnswerCommentUserResponseDto> answersToAnswerCommentUserResponseDtos(List<Answer> answers) {
+    default List<AnswerCommentUserResponse> answersToAnswerCommentUserResponseDtos(List<Answer> answers) {
         if ( answers == null ) {
             return null;
         }
 
-        List<AnswerCommentUserResponseDto> list = new ArrayList<>(answers.size());
+        List<AnswerCommentUserResponse> list = new ArrayList<>(answers.size());
         for ( Answer answer : answers ) {
             list.add( answerToAnswerCommentUserResponseDto( answer) );
         }
