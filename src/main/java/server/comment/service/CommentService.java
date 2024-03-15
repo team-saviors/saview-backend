@@ -1,9 +1,5 @@
 package server.comment.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,11 +14,15 @@ import server.comment.mapper.CommentMapper;
 import server.comment.repository.CommentRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
-import server.response.AnswerCommentUserResponseDto;
+import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponseDto;
 import server.user.entity.User;
-import server.user.mapper.UserMapper;
 import server.user.repository.UserRepository;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -66,17 +66,17 @@ public class CommentService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 
-    public List<CommentResponseDto> findComments(Answer answer, UserMapper userMapper) {
+    public List<CommentResponseDto> findComments(Answer answer) {
         List<Comment> findAllComments = commentRepository.findAllByAnswer(answer);
         List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
         for (Comment comment : findAllComments) {
-            commentResponseDtos.add(commentMapper.commentToCommentResponseDto(comment, userMapper));
+            commentResponseDtos.add(commentMapper.commentToCommentResponseDto(comment));
         }
         return commentResponseDtos;
     }
 
-    public MultiResponseDto<AnswerCommentUserResponseDto> userInfoComments(User user,
-                                                                           int page, int size) {
+    public MultiResponseDto<AnswerCommentUserResponse> userInfoComments(User user,
+                                                                        int page, int size) {
         Page<Comment> pageComments = commentRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
         List<Comment> comments = pageComments.getContent();

@@ -15,15 +15,13 @@ import server.comment.service.CommentService;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
-import server.response.AnswerCommentUserResponseDto;
+import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponseDto;
 import server.user.entity.Badge;
 import server.user.entity.User;
-import server.user.mapper.UserMapper;
 import server.user.repository.BadgeRepository;
 
 import java.util.List;
-
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -56,20 +54,19 @@ public class AnswerService {
     }
 
     public MultiResponseDto<AnswerResponseDto> findAnswers(Question question,
-                                                           UserMapper userMapper,
                                                            CommentService commentService,
                                                            int page, int size, String sort) {
         try {
             Page<Answer> pageAnswers = answerRepository.findAllByQuestion(question, PageRequest.of(page - 1, size, Sort.by(sort).descending()));
             List<Answer> answers = pageAnswers.getContent();
-            return new MultiResponseDto<>(answerMapper.answersToAnswersResponseDtos(answers, userMapper, commentService), pageAnswers);
+            return new MultiResponseDto<>(answerMapper.answersToAnswersResponseDtos(answers, commentService), pageAnswers);
         } catch (Exception e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_SORT_PARAMETER);
         }
     }
 
-    public MultiResponseDto<AnswerCommentUserResponseDto> userInfoAnswers(User user,
-                                                                          int page, int size) {
+    public MultiResponseDto<AnswerCommentUserResponse> userInfoAnswers(User user,
+                                                                       int page, int size) {
         Page<Answer> pageAnswers = answerRepository.findAllByUser(user, PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
         List<Answer> answers = pageAnswers.getContent();
         return new MultiResponseDto<>(answerMapper.answersToAnswerCommentUserResponseDtos(answers), pageAnswers);

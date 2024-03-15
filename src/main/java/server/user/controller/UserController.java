@@ -8,9 +8,13 @@ import org.springframework.web.bind.annotation.*;
 import server.answer.service.AnswerService;
 import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
-import server.user.dto.*;
+import server.user.dto.request.PasswordRequest;
+import server.user.dto.request.UserPostRequest;
+import server.user.dto.request.UserPutRequest;
+import server.user.dto.response.UserAnswersResponse;
+import server.user.dto.response.UserCommentsResponse;
+import server.user.dto.response.UserResponse;
 import server.user.entity.User;
-import server.user.mapper.UserMapper;
 import server.user.service.UserService;
 
 import javax.validation.Valid;
@@ -24,26 +28,24 @@ import java.net.URI;
 public class UserController {
 
     private final UserService userService;
-    private final UserMapper userMapper;
-
     private final AnswerService answerService;
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<Void> join(@Valid @RequestBody UserPostDto userPostDto) {
+    public ResponseEntity<Void> join(@Valid @RequestBody UserPostRequest userPostDto) {
         User user = userService.createUser(userPostDto);
         return ResponseEntity.created(URI.create("/users/" + user.getUserId())).build();
     }
 
     @GetMapping("/{user-id}")
-    public ResponseEntity<UserResponseDto> getUser(@Positive @PathVariable("user-id") long userId) {
+    public ResponseEntity<UserResponse> getUser(@Positive @PathVariable("user-id") long userId) {
         User findUser = userService.findUserById(userId);
-        return ResponseEntity.ok(userMapper.userToUserResponseDto(findUser));
+        return ResponseEntity.ok(UserResponse.from(findUser));
     }
 
     @PutMapping("/modify")
-    public ResponseEntity<Void> putUser(@Valid @RequestBody UserPutDto userPutDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        userService.updateUser(principalDetails.getUsername(), userPutDto);
+    public ResponseEntity<Void> putUser(@Valid @RequestBody UserPutRequest userPutRequest, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.updateUser(principalDetails.getUsername(), userPutRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -54,23 +56,23 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> putPassword(@Valid @RequestBody PasswordDto passwordDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        userService.updatePassword(principalDetails.getUsername(), passwordDto.getCurPassword(), passwordDto.getNewPassword());
+    public ResponseEntity<Void> putPassword(@Valid @RequestBody PasswordRequest passwordRequest, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.updatePassword(principalDetails.getUsername(), passwordRequest.getCurPassword(), passwordRequest.getNewPassword());
         return ResponseEntity.ok().build();
     }
 
     // UserInfo Page Answers
     @GetMapping("/{user-id}/user-answers")
-    public ResponseEntity<UserAnswersResponseDto> userInfoAnswers(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
+    public ResponseEntity<UserAnswersResponse> userInfoAnswers(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
-        return ResponseEntity.ok(userMapper.userToUserAnswersResponseDto(findUser, page, size, answerService));
+        return ResponseEntity.ok(UserAnswersResponse.from(answerService.userInfoAnswers(findUser, page, size)));
     }
 
 
     // UserInfo Page Comments
     @GetMapping("/{user-id}/user-comments")
-    public ResponseEntity<UserCommentsResponseDto> userInfoComments(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
+    public ResponseEntity<UserCommentsResponse> userInfoComments(@Positive @PathVariable("user-id") long userId, @Positive @RequestParam int page, @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
-        return ResponseEntity.ok(userMapper.userToUserCommentsResponseDto(findUser, page, size, commentService));
+        return ResponseEntity.ok(UserCommentsResponse.from(commentService.userInfoComments(findUser, page, size)));
     }
 }

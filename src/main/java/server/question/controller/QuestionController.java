@@ -18,9 +18,7 @@ import server.question.entity.Question;
 import server.question.mapper.QuestionMapper;
 import server.question.service.QuestionService;
 import server.response.MultiResponseDto;
-import server.user.mapper.UserMapper;
 import server.user.service.UserService;
-
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -36,7 +34,6 @@ public class QuestionController {
     private final QuestionMapper questionMapper;
     private final UserService userService;
     private final AnswerService answerService;
-    private final UserMapper userMapper;
     private final CommentService commentService;
 
     @PostMapping
@@ -60,7 +57,7 @@ public class QuestionController {
                                                            @RequestParam String sort,
                                                            @Positive @PathVariable("question-id") long questionId) {
         Question question = questionService.findQuestion(questionId);
-        return ResponseEntity.ok(questionMapper.questionToQuestionResponseDto(question, userMapper, answerService, commentService, page, size, sort));
+        return ResponseEntity.ok(questionMapper.questionToQuestionResponseDto(question, answerService, commentService, page, size, sort));
     }
 
     @GetMapping
@@ -70,7 +67,7 @@ public class QuestionController {
         Page<Question> pageQuestions = questionService.findQuestions(page - 1, size);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions, userMapper), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
     }
 
     @PutMapping("/{question-id}")
@@ -108,7 +105,7 @@ public class QuestionController {
         Page<Question> pageQuestions = questionService.findQuestionsByCategory(mainCategory, subCategory, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions, userMapper), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
     }
 
     @GetMapping("/search")
@@ -118,6 +115,6 @@ public class QuestionController {
                                                                                  @RequestParam String sort) {
         Page<Question> pageQuestions = questionService.search(keyword, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions, userMapper), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
     }
 }
