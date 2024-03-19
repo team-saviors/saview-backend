@@ -1,22 +1,5 @@
 package server.user.entity;
 
-import static server.user.entity.User.UserStatus.USER_ACTIVE;
-import static server.user.entity.User.UserStatus.USER_QUIT;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,11 +9,20 @@ import server.comment.entity.Comment;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
+import server.user.dto.request.UserPutRequest;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static lombok.AccessLevel.PROTECTED;
+import static server.user.entity.User.UserStatus.USER_ACTIVE;
+import static server.user.entity.User.UserStatus.USER_QUIT;
 
 @Entity
 @Getter
 @Table(name = "USER_TABLE")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
 public class User extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,9 +81,9 @@ public class User extends Auditable {
         }
     }
 
-    public void updateNicknameAndProfile(String nickname, String profile) {
-        this.nickname = nickname;
-        this.profile = profile;
+    public void updateNicknameAndProfile(UserPutRequest userPutRequest) {
+        this.nickname = userPutRequest.getNickname();
+        this.profile = userPutRequest.getProfile();
     }
 
     public void initBadge(Badge badge) {

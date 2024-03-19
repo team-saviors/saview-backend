@@ -1,21 +1,22 @@
 package server.question.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import server.answer.entity.Answer;
 
 import server.audit.Auditable;
+import server.question.dto.request.QuestionPutRequest;
 import server.user.entity.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static lombok.AccessLevel.PROTECTED;
+
 @Entity
 @Getter
-@Setter
+@NoArgsConstructor(access = PROTECTED)
 public class Question extends Auditable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionId;
@@ -39,4 +40,17 @@ public class Question extends Auditable {
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Answer> answers = new ArrayList<>();
 
+    @Builder
+    public Question(String mainCategory, String subCategory, String content, User user) {
+        this.content = content;
+        this.mainCategory = mainCategory;
+        this.subCategory = subCategory;
+        this.user = user;
+    }
+
+    public void updateQuestion(QuestionPutRequest questionPutRequest) {
+        this.content = questionPutRequest.getContent();
+        this.mainCategory = questionPutRequest.getMainCategory();
+        this.subCategory = questionPutRequest.getSubCategory();
+    }
 }
