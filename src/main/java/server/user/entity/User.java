@@ -70,7 +70,7 @@ public class User extends Auditable {
     }
 
     @Builder
-    public User(String password, String email, String nickname) {
+    private User(String password, String email, String nickname) {
         this.password = password;
         this.email = email;
         this.nickname = nickname;

@@ -42,7 +42,7 @@ public class Question extends Auditable {
     private List<Answer> answers = new ArrayList<>();
 
     @Builder
-    public Question(String mainCategory, String subCategory, String content, User user) {
+    private Question(String mainCategory, String subCategory, String content, User user) {
         this.content = content;
         this.mainCategory = mainCategory;
         this.subCategory = subCategory;

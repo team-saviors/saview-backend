@@ -2,17 +2,19 @@ package server.user.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 import server.user.entity.User;
 
 import static lombok.AccessLevel.PRIVATE;
 
 @Getter
+@FieldDefaults(level = PRIVATE)
 @Builder(access = PRIVATE)
 public class UserProfileResponse {
-    private long userId;
-    private String nickname;
-    private String profile;
-    private String status;
+    long userId;
+    String nickname;
+    String profile;
+    String status;
 
     public static UserProfileResponse from(User user) {
         return UserProfileResponse.builder()

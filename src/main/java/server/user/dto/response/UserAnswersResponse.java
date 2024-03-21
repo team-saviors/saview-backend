@@ -7,7 +7,6 @@ import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponseDto;
 
 import static lombok.AccessLevel.PRIVATE;
-import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @FieldDefaults(level = PRIVATE)

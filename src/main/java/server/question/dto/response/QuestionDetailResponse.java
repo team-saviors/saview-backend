@@ -2,7 +2,6 @@ package server.question.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import server.answer.dto.AnswerResponseDto;
 import server.question.entity.Question;
@@ -12,16 +11,16 @@ import server.user.dto.response.UserProfileResponse;
 import static lombok.AccessLevel.PRIVATE;
 
 @Getter
-@FieldDefaults(level = PRIVATE)
 @Builder(access = PRIVATE)
+@FieldDefaults(level = PRIVATE)
 public class QuestionDetailResponse {
-    private Long questionId;
-    private String content;
-    private String mainCategory;
-    private String subCategory;
-    private int views;
-    private UserProfileResponse user;
-    private MultiResponseDto<AnswerResponseDto> answers;
+    Long questionId;
+    String content;
+    String mainCategory;
+    String subCategory;
+    int views;
+    UserProfileResponse user;
+    MultiResponseDto<AnswerResponseDto> answers;
 
     public static QuestionDetailResponse of(Question question, MultiResponseDto<AnswerResponseDto> answers) {
         return QuestionDetailResponse.builder()

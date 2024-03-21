@@ -67,7 +67,7 @@ public class QuestionController {
         Page<Question> pageQuestions = questionService.findQuestions(page - 1, size);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromList(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 
     @PutMapping("/{question-id}")
@@ -103,7 +103,7 @@ public class QuestionController {
         Page<Question> pageQuestions = questionService.findQuestionsByCategory(mainCategory, subCategory, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromList(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 
     @GetMapping("/search")
@@ -113,6 +113,6 @@ public class QuestionController {
                                                                                  @RequestParam String sort) {
         Page<Question> pageQuestions = questionService.search(keyword, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
-        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromList(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 }
