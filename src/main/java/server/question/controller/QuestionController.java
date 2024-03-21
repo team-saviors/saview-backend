@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.service.AnswerService;
 import server.comment.service.CommentService;
-import server.question.dto.Views;
+import server.question.dto.ViewRequest;
 import server.question.dto.request.QuestionPostRequest;
 import server.question.dto.request.QuestionPutRequest;
 import server.question.dto.response.QuestionDetailResponse;
@@ -87,8 +87,8 @@ public class QuestionController {
 
     @PutMapping("/{question-id}/views")
     public ResponseEntity<Void> putViews(@Positive @PathVariable("question-id") long questionId,
-                                         @Valid @RequestBody Views views) {
-        questionService.updateViews(questionId, views.getViews());
+                                         @Valid @RequestBody ViewRequest viewRequest) {
+        questionService.updateViews(questionId, viewRequest.getViews());
 
         return ResponseEntity.ok().build();
     }

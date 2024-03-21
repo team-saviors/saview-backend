@@ -15,6 +15,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.GenerationType.*;
 import static lombok.AccessLevel.PROTECTED;
 import static server.user.entity.User.UserStatus.USER_ACTIVE;
 import static server.user.entity.User.UserStatus.USER_QUIT;
@@ -25,7 +26,7 @@ import static server.user.entity.User.UserStatus.USER_QUIT;
 @NoArgsConstructor(access = PROTECTED)
 public class User extends Auditable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     private Long userId;
 
     @Column(nullable = false)
