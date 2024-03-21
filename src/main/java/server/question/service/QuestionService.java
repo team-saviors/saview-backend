@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
+import server.question.dto.request.QuestionPutRequest;
 import server.question.entity.Question;
 import server.question.repository.QuestionRepository;
 
@@ -32,12 +33,9 @@ public class QuestionService {
         return questionRepository.findAll(PageRequest.of(page, size, Sort.by("questionId").descending()));
     }
 
-    public void updateQuestion(Question question) {
-        Question updateQuestion = findVerifiedQuestion(question.getQuestionId());
-        updateQuestion.setContent(question.getContent());
-        updateQuestion.setMainCategory(question.getMainCategory());
-        updateQuestion.setSubCategory(question.getSubCategory());
-        questionRepository.save(updateQuestion);
+    public void updateQuestion(QuestionPutRequest questionPutRequest, long questionId) {
+        Question updateQuestion = findVerifiedQuestion(questionId);
+        updateQuestion.updateQuestion(questionPutRequest);
     }
 
     public void deleteQuestion(long questionId) {
@@ -56,8 +54,8 @@ public class QuestionService {
 
     public Page<Question> findQuestionsByCategory(String mainCategory, String subCategory, int page, int size, String sort) {
 
-        Sort sortParm = Sort.by(sort).descending();
-        PageRequest pageRequest = PageRequest.of(page, size, sortParm);
+        Sort sortParam = Sort.by(sort).descending();
+        PageRequest pageRequest = PageRequest.of(page, size, sortParam);
 
         if (mainCategory.equals("all")) {
             if (subCategory.equals("all")) {
@@ -68,18 +66,14 @@ public class QuestionService {
         } else {
             if (subCategory.equals("all")) {
                 return questionRepository.findAllByMainCategory(mainCategory, pageRequest);
-            }
-            else {
+            } else {
                 return questionRepository.findAllByMainCategoryAndSubCategory(mainCategory, subCategory, pageRequest);
             }
         }
     }
 
     public Page<Question> search(String keyword, int page, int size, String sort) {
-
-        Page<Question> questionList = questionRepository.findByContentContaining(keyword,
-                PageRequest.of(page, size, Sort.by(sort).descending()));
-
-        return questionList;
+        return questionRepository.findByContentContaining(keyword,
+            PageRequest.of(page, size, Sort.by(sort).descending()));
     }
 }

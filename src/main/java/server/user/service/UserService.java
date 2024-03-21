@@ -74,7 +74,7 @@ public class UserService {
 
     public void updateUser(String email, UserPutRequest userPutRequest) {
         User user = userRepository.findByEmail(email);
-        user.updateNicknameAndProfile(userPutRequest.getNickname(), userPutRequest.getProfile());
+        user.updateNicknameAndProfile(userPutRequest);
     }
 
     public void deleteUser(String email) {

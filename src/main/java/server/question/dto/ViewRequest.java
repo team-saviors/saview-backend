@@ -5,7 +5,7 @@ import lombok.Getter;
 import javax.validation.constraints.PositiveOrZero;
 
 @Getter
-public class ViewsDto {
+public class ViewRequest {
 
     @PositiveOrZero
     private int views;

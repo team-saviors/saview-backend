@@ -8,14 +8,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import server.answer.dto.AnswerResponseDto;
 import server.answer.service.AnswerService;
 import server.comment.service.CommentService;
-import server.question.dto.QuestionPostPutDto;
-import server.question.dto.QuestionResponseDto;
-import server.question.dto.QuestionsResponseDto;
-import server.question.dto.ViewsDto;
+import server.question.dto.ViewRequest;
+import server.question.dto.request.QuestionPostRequest;
+import server.question.dto.request.QuestionPutRequest;
+import server.question.dto.response.QuestionDetailResponse;
+import server.question.dto.response.QuestionListResponse;
 import server.question.entity.Question;
-import server.question.mapper.QuestionMapper;
 import server.question.service.QuestionService;
 import server.response.MultiResponseDto;
 import server.user.service.UserService;
@@ -31,20 +32,18 @@ import java.util.List;
 @RequestMapping("/questions")
 public class QuestionController {
     private final QuestionService questionService;
-    private final QuestionMapper questionMapper;
     private final UserService userService;
     private final AnswerService answerService;
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<Void> postQuestion(@Valid @RequestBody QuestionPostPutDto questionPostPutDto,
+    public ResponseEntity<Void> postQuestion(@Valid @RequestBody QuestionPostRequest questionPostRequest,
                                              Authentication authentication) {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
 
-        Question question = questionMapper.questionPostPutDtoToQuestion(questionPostPutDto);
-        question.setUser(userService.findUser(email));
+        Question question = questionPostRequest.toEntity(userService.findUser(email));
 
         final Long questionId = questionService.createdQuestion(question);
 
@@ -52,30 +51,29 @@ public class QuestionController {
     }
 
     @GetMapping("/{question-id}")
-    public ResponseEntity<QuestionResponseDto> getQuestion(@Positive @RequestParam int page,
-                                                           @Positive @RequestParam int size,
-                                                           @RequestParam String sort,
-                                                           @Positive @PathVariable("question-id") long questionId) {
+    public ResponseEntity<QuestionDetailResponse> getQuestion(@Positive @RequestParam int page,
+                                                              @Positive @RequestParam int size,
+                                                              @RequestParam String sort,
+                                                              @Positive @PathVariable("question-id") long questionId) {
         Question question = questionService.findQuestion(questionId);
-        return ResponseEntity.ok(questionMapper.questionToQuestionResponseDto(question, answerService, commentService, page, size, sort));
+        MultiResponseDto<AnswerResponseDto> answers = answerService.findAnswers(question, commentService, page, size, sort);
+        return ResponseEntity.ok(QuestionDetailResponse.of(question, answers));
     }
 
     @GetMapping
     @Transactional(readOnly = true)
-    public ResponseEntity<MultiResponseDto<QuestionsResponseDto>> getQuestions(@Positive @RequestParam int page,
+    public ResponseEntity<MultiResponseDto<QuestionListResponse>> getQuestions(@Positive @RequestParam int page,
                                                                                @Positive @RequestParam int size) {
         Page<Question> pageQuestions = questionService.findQuestions(page - 1, size);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 
     @PutMapping("/{question-id}")
     public ResponseEntity<Void> putQuestion(@Positive @PathVariable("question-id") long questionId,
-                                            @Valid @RequestBody QuestionPostPutDto questionPostPutDto) {
-        Question question = questionMapper.questionPostPutDtoToQuestion(questionPostPutDto);
-        question.setQuestionId(questionId);
-        questionService.updateQuestion(question);
+                                            @Valid @RequestBody QuestionPutRequest questionPutRequest) {
+        questionService.updateQuestion(questionPutRequest, questionId);
 
         return ResponseEntity.ok().build();
     }
@@ -89,15 +87,15 @@ public class QuestionController {
 
     @PutMapping("/{question-id}/views")
     public ResponseEntity<Void> putViews(@Positive @PathVariable("question-id") long questionId,
-                                         @Valid @RequestBody ViewsDto viewsDto) {
-        questionService.updateViews(questionId, viewsDto.getViews());
+                                         @Valid @RequestBody ViewRequest viewRequest) {
+        questionService.updateViews(questionId, viewRequest.getViews());
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/tags")
     @Transactional(readOnly = true)
-    public ResponseEntity<MultiResponseDto<QuestionsResponseDto>> getQuestionsByCategory(@RequestParam String mainCategory,
+    public ResponseEntity<MultiResponseDto<QuestionListResponse>> getQuestionsByCategory(@RequestParam String mainCategory,
                                                                                          @RequestParam String subCategory,
                                                                                          @Positive @RequestParam int page,
                                                                                          @Positive @RequestParam int size,
@@ -105,16 +103,16 @@ public class QuestionController {
         Page<Question> pageQuestions = questionService.findQuestionsByCategory(mainCategory, subCategory, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
 
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<MultiResponseDto<QuestionsResponseDto>> searchQuestion(@RequestParam(value = "keyword") String keyword,
+    public ResponseEntity<MultiResponseDto<QuestionListResponse>> searchQuestion(@RequestParam(value = "keyword") String keyword,
                                                                                  @Positive @RequestParam int page,
                                                                                  @Positive @RequestParam int size,
                                                                                  @RequestParam String sort) {
         Page<Question> pageQuestions = questionService.search(keyword, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
-        return ResponseEntity.ok(new MultiResponseDto<>(questionMapper.questionsToQuestionsResponseDtos(questions), pageQuestions));
+        return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 }
