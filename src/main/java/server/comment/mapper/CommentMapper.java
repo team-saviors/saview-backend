@@ -1,7 +1,7 @@
 package server.comment.mapper;
 
 import org.mapstruct.Mapper;
-import server.comment.dto.CommentResponseDto;
+import server.comment.dto.CommentResponse;
 import server.comment.entity.Comment;
 import server.response.AnswerCommentUserResponse;
 import server.user.dto.response.UserProfileResponse;
@@ -13,16 +13,16 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    default CommentResponseDto commentToCommentResponseDto(Comment comment) {
-        CommentResponseDto commentResponseDto = new CommentResponseDto();
+    default CommentResponse commentToCommentResponseDto(Comment comment) {
+        CommentResponse commentResponse = new CommentResponse();
 
-        commentResponseDto.setCommentId(comment.getCommentId());
-        commentResponseDto.setContent(comment.getContent());
-        commentResponseDto.setCreatedAt(comment.getCreatedAt());
-        commentResponseDto.setModifiedAt(comment.getModifiedAt());
-        commentResponseDto.setUser(UserProfileResponse.from(comment.getUser()));
+        commentResponse.setCommentId(comment.getCommentId());
+        commentResponse.setContent(comment.getContent());
+        commentResponse.setCreatedAt(comment.getCreatedAt());
+        commentResponse.setModifiedAt(comment.getModifiedAt());
+        commentResponse.setUser(UserProfileResponse.from(comment.getUser()));
 
-        return commentResponseDto;
+        return commentResponse;
     }
 
     default AnswerCommentUserResponse commentToAnswerCommentUserResponseDto(Comment comment) {

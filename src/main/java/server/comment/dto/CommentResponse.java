@@ -8,7 +8,7 @@ import server.user.dto.response.UserProfileResponse;
 
 @Getter
 @Setter
-public class CommentResponseDto {
+public class CommentResponse {
 
     private long commentId;
     private UserProfileResponse user;
