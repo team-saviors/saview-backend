@@ -1,6 +1,8 @@
 package server.comment.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -15,7 +17,6 @@ import server.comment.dto.CommentPostRequest;
 import server.comment.dto.CommentPutRequest;
 import server.comment.dto.CommentResponse;
 import server.comment.entity.Comment;
-import server.comment.mapper.CommentMapper;
 import server.comment.repository.CommentRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
@@ -32,7 +33,6 @@ public class CommentService {
     public static final int COMMENT_BADGE_SCORE = 10;
 
     private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
     private final UserRepository userRepository;
     private final AnswerService answerService;
 
@@ -64,6 +64,11 @@ public class CommentService {
 
     public List<CommentResponse> findCommentsByAnswer(Answer answer) {
         List<Comment> comments = commentRepository.findAllByAnswer(answer);
+
+        if (Objects.isNull(comments)) {
+            return Collections.emptyList();
+        }
+
         return comments.stream()
                 .map(CommentResponse::from)
                 .collect(Collectors.toUnmodifiableList());
@@ -74,6 +79,11 @@ public class CommentService {
         Page<Comment> pageComments = commentRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
         List<Comment> comments = pageComments.getContent();
-        return new MultiResponseDto<>(commentMapper.commentsToAnswerCommentUserResponseDtos(comments), pageComments);
+
+        List<AnswerCommentUserResponse> responses = comments.stream()
+                .map(AnswerCommentUserResponse::from)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(responses, pageComments);
     }
 }

@@ -2,6 +2,7 @@ package server.comment.dto;
 
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.Getter;
 import server.comment.entity.Comment;
 import server.user.dto.response.UserProfileResponse;
@@ -28,6 +29,10 @@ public class CommentResponse {
     }
 
     public static CommentResponse from(Comment comment) {
+        if (Objects.isNull(comment)) {
+            return null;
+        }
+
         return new CommentResponse(
                 comment.getCommentId(),
                 UserProfileResponse.from(comment.getUser()),
