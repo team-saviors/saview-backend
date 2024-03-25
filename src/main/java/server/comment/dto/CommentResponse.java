@@ -3,11 +3,10 @@ package server.comment.dto;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
-import lombok.Setter;
+import server.comment.entity.Comment;
 import server.user.dto.response.UserProfileResponse;
 
 @Getter
-@Setter
 public class CommentResponse {
 
     private long commentId;
@@ -15,4 +14,26 @@ public class CommentResponse {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private String content;
+
+    private CommentResponse(long commentId,
+                            UserProfileResponse user,
+                            LocalDateTime createdAt,
+                            LocalDateTime modifiedAt,
+                            String content) {
+        this.commentId = commentId;
+        this.user = user;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+        this.content = content;
+    }
+
+    public static CommentResponse from(Comment comment) {
+        return new CommentResponse(
+                comment.getCommentId(),
+                UserProfileResponse.from(comment.getUser()),
+                comment.getCreatedAt(),
+                comment.getModifiedAt(),
+                comment.getContent()
+        );
+    }
 }

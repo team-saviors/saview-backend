@@ -1,8 +1,8 @@
 package server.comment.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,9 +47,9 @@ public class CommentService {
         return comment.getCommentId();
     }
 
-    public void updateComment(Long commentId, CommentPutRequest commentDto) {
+    public void updateComment(Long commentId, CommentPutRequest request) {
         Comment comment = findVerifiedComment(commentId);
-        comment.updateContent(commentDto.getContent());
+        comment.updateContent(request.getContent());
     }
 
     public void deleteComment(long commentId) {
@@ -62,13 +62,11 @@ public class CommentService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 
-    public List<CommentResponse> findComments(Answer answer) {
-        List<Comment> findAllComments = commentRepository.findAllByAnswer(answer);
-        List<CommentResponse> commentResponses = new ArrayList<>();
-        for (Comment comment : findAllComments) {
-            commentResponses.add(commentMapper.commentToCommentResponseDto(comment));
-        }
-        return commentResponses;
+    public List<CommentResponse> findCommentsByAnswer(Answer answer) {
+        List<Comment> comments = commentRepository.findAllByAnswer(answer);
+        return comments.stream()
+                .map(CommentResponse::from)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public MultiResponseDto<AnswerCommentUserResponse> userInfoComments(User user,

@@ -43,7 +43,7 @@ public interface AnswerMapper {
 
         answerResponseDto.setUser(UserProfileResponse.from(answer.getUser()));
 
-        answerResponseDto.setComments(commentService.findComments(answer));
+        answerResponseDto.setComments(commentService.findCommentsByAnswer(answer));
 
         return answerResponseDto;
     }
