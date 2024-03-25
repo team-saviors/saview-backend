@@ -36,16 +36,12 @@ public class CommentService {
     private final UserRepository userRepository;
     private final AnswerService answerService;
 
-    public Long createComment(CommentPostRequest commentDto, Long answerId, String email) {
+    public Long createComment(CommentPostRequest request, Long answerId, String email) {
         User user = Optional.ofNullable(userRepository.findByEmail(email))
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
         user.addBadgeScore(COMMENT_BADGE_SCORE);
-
-        Comment comment = Comment.builder()
-                .content(commentDto.getContent())
-                .user(user)
-                .answer(answerService.findVerifiedAnswer(answerId))
-                .build();
+        Answer answer = answerService.findVerifiedAnswer(answerId);
+        Comment comment = request.toEntity(answer, user);
 
         commentRepository.save(comment);
         return comment.getCommentId();
