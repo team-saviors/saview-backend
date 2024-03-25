@@ -10,11 +10,11 @@ import server.user.dto.response.UserProfileResponse;
 @Getter
 public class CommentResponse {
 
-    private long commentId;
-    private UserProfileResponse user;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-    private String content;
+    private final long commentId;
+    private final UserProfileResponse user;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime modifiedAt;
+    private final String content;
 
     private CommentResponse(long commentId,
                             UserProfileResponse user,

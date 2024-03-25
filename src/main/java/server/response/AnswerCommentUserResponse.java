@@ -17,6 +17,7 @@ public class AnswerCommentUserResponse {
     private LocalDateTime createdAt;
     private String content;
 
+    // todo: answer mapper 때문에 임시로 기본 생성자 놔뒀습니다.
     public AnswerCommentUserResponse() {
     }
 
