@@ -22,8 +22,8 @@ import java.util.Optional;
 import static server.user.entity.User.UserStatus.USER_QUIT;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;

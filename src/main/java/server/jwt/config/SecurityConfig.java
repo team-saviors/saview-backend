@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/**/answers", "/**/comments")
+            // TODO: 추후 수정할 부분
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
                 .antMatchers("/**/votes")
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
@@ -58,7 +59,7 @@ public class SecurityConfig {
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
                 .antMatchers(HttpMethod.PUT, "/questions/*")
                 .access("hasRole('ROLE_ADMIN')")
-                .antMatchers(HttpMethod.DELETE, "questions/*")
+                .antMatchers(HttpMethod.DELETE, "/questions/*")
                 .access("hasRole('ROLE_ADMIN')")
                 .antMatchers("/users/test")
                 .access("hasRole('ROLE_USER')")
