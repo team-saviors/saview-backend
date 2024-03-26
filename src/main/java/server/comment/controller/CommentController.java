@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import server.comment.dto.CommentPostPutDto;
+import server.comment.dto.CommentPostRequest;
+import server.comment.dto.CommentPutRequest;
 import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
 
@@ -26,9 +27,9 @@ public class CommentController {
 
     @PostMapping("/answers/{answer-id}/comments")
     public ResponseEntity<Void> postComment(@Positive @PathVariable("answer-id") long answerId,
-                                            @Valid @RequestBody CommentPostPutDto commentPostPutDto,
+                                            @Valid @RequestBody CommentPostRequest request,
                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        final Long commentId = commentService.createdComment(commentPostPutDto, answerId,
+        final Long commentId = commentService.createComment(request, answerId,
                 principalDetails.getUsername());
 
         return ResponseEntity.created(URI.create("/comments/" + commentId)).build();
@@ -36,8 +37,8 @@ public class CommentController {
 
     @PutMapping("/comments/{comment-id}")
     public ResponseEntity<Void> putComment(@Positive @PathVariable("comment-id") long commentId,
-                                           @Valid @RequestBody CommentPostPutDto commentPostPutDto) {
-        commentService.updateComment(commentId, commentPostPutDto);
+                                           @Valid @RequestBody CommentPutRequest request) {
+        commentService.updateComment(commentId, request);
 
         return ResponseEntity.ok().build();
     }

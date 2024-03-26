@@ -1,5 +1,11 @@
 package server.comment.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,10 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.answer.entity.Answer;
 import server.answer.service.AnswerService;
-import server.comment.dto.CommentPostPutDto;
-import server.comment.dto.CommentResponseDto;
+import server.comment.dto.CommentPostRequest;
+import server.comment.dto.CommentPutRequest;
+import server.comment.dto.CommentResponse;
 import server.comment.entity.Comment;
-import server.comment.mapper.CommentMapper;
 import server.comment.repository.CommentRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
@@ -18,11 +24,6 @@ import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponseDto;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
-
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -32,28 +33,23 @@ public class CommentService {
     public static final int COMMENT_BADGE_SCORE = 10;
 
     private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
     private final UserRepository userRepository;
     private final AnswerService answerService;
 
-    public Long createdComment(CommentPostPutDto commentDto, Long answerId, String email) {
+    public Long createComment(CommentPostRequest request, Long answerId, String email) {
         User user = Optional.ofNullable(userRepository.findByEmail(email))
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
         user.addBadgeScore(COMMENT_BADGE_SCORE);
-
-        Comment comment = Comment.builder()
-                .content(commentDto.getContent())
-                .user(user)
-                .answer(answerService.findVerifiedAnswer(answerId))
-                .build();
+        Answer answer = answerService.findVerifiedAnswer(answerId);
+        Comment comment = request.toEntity(answer, user);
 
         commentRepository.save(comment);
         return comment.getCommentId();
     }
 
-    public void updateComment(Long commentId, CommentPostPutDto commentDto) {
+    public void updateComment(Long commentId, CommentPutRequest request) {
         Comment comment = findVerifiedComment(commentId);
-        comment.updateContent(commentDto.getContent());
+        comment.updateContent(request.getContent());
     }
 
     public void deleteComment(long commentId) {
@@ -66,13 +62,16 @@ public class CommentService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 
-    public List<CommentResponseDto> findComments(Answer answer) {
-        List<Comment> findAllComments = commentRepository.findAllByAnswer(answer);
-        List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
-        for (Comment comment : findAllComments) {
-            commentResponseDtos.add(commentMapper.commentToCommentResponseDto(comment));
+    public List<CommentResponse> findCommentsByAnswer(Answer answer) {
+        List<Comment> comments = commentRepository.findAllByAnswer(answer);
+
+        if (Objects.isNull(comments)) {
+            return Collections.emptyList();
         }
-        return commentResponseDtos;
+
+        return comments.stream()
+                .map(CommentResponse::from)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public MultiResponseDto<AnswerCommentUserResponse> userInfoComments(User user,
@@ -80,6 +79,11 @@ public class CommentService {
         Page<Comment> pageComments = commentRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
         List<Comment> comments = pageComments.getContent();
-        return new MultiResponseDto<>(commentMapper.commentsToAnswerCommentUserResponseDtos(comments), pageComments);
+
+        List<AnswerCommentUserResponse> responses = comments.stream()
+                .map(AnswerCommentUserResponse::from)
+                .collect(Collectors.toList());
+
+        return new MultiResponseDto<>(responses, pageComments);
     }
 }
