@@ -1,30 +1,30 @@
 package server.answer.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.mapstruct.Mapper;
-import server.answer.dto.AnswerPostPutDto;
+import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.entity.Answer;
 import server.comment.service.CommentService;
 import server.response.AnswerCommentUserResponse;
 import server.user.dto.response.UserProfileResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Mapper(componentModel = "spring")
 public interface AnswerMapper {
 
-    Answer answerPostPutDtoToAnswer(AnswerPostPutDto answerPostPutDto);
+    Answer answerPostPutDtoToAnswer(AnswerPostRequest answerPostPutDto);
+
     default List<AnswerResponseDto> answersToAnswersResponseDtos(List<Answer> answers,
                                                                  CommentService commentService) {
-        if ( answers == null ) {
+        if (answers == null) {
             return null;
         }
 
         List<AnswerResponseDto> list = new ArrayList<>(answers.size());
-        for ( Answer answer : answers ) {
-            list.add( answerToAnswerResponseDto( answer, commentService ) );
+        for (Answer answer : answers) {
+            list.add(answerToAnswerResponseDto(answer, commentService));
         }
 
         return list;
@@ -62,13 +62,13 @@ public interface AnswerMapper {
     }
 
     default List<AnswerCommentUserResponse> answersToAnswerCommentUserResponseDtos(List<Answer> answers) {
-        if ( answers == null ) {
+        if (answers == null) {
             return null;
         }
 
         List<AnswerCommentUserResponse> list = new ArrayList<>(answers.size());
-        for ( Answer answer : answers ) {
-            list.add( answerToAnswerCommentUserResponseDto( answer) );
+        for (Answer answer : answers) {
+            list.add(answerToAnswerCommentUserResponseDto(answer));
         }
 
         return list;

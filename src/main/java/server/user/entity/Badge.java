@@ -15,7 +15,6 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Badge {
     @Id
@@ -35,9 +34,8 @@ public class Badge {
     @JoinColumn(name = "USER_ID")
     private User user;
 
-
     @Builder
-    public Badge(int score, int level, String badgeImg, User user) {
+    private Badge(int score, int level, String badgeImg, User user) {
         this.score = score;
         this.level = level;
         this.badgeImg = badgeImg;
