@@ -39,7 +39,7 @@ public class Question extends Auditable {
     private User user;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<Answer> answers = new ArrayList<>();
+    private final List<Answer> answers = new ArrayList<>();
 
     @Builder
     private Question(String mainCategory, String subCategory, String content, User user) {
