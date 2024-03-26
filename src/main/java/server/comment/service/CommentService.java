@@ -21,7 +21,7 @@ import server.comment.repository.CommentRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.response.AnswerCommentUserResponse;
-import server.response.MultiResponseDto;
+import server.response.MultiResponse;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
 
@@ -74,8 +74,8 @@ public class CommentService {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public MultiResponseDto<AnswerCommentUserResponse> userInfoComments(User user,
-                                                                        int page, int size) {
+    public MultiResponse<AnswerCommentUserResponse> userInfoComments(User user,
+                                                                     int page, int size) {
         Page<Comment> pageComments = commentRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
         List<Comment> comments = pageComments.getContent();
@@ -84,6 +84,6 @@ public class CommentService {
                 .map(AnswerCommentUserResponse::from)
                 .collect(Collectors.toList());
 
-        return new MultiResponseDto<>(responses, pageComments);
+        return new MultiResponse<>(responses, pageComments);
     }
 }

@@ -3,47 +3,12 @@ package server.answer.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.Mapper;
-import server.answer.dto.AnswerResponseDto;
 import server.answer.entity.Answer;
-import server.comment.service.CommentService;
 import server.response.AnswerCommentUserResponse;
-import server.user.dto.response.UserProfileResponse;
 
 
 @Mapper(componentModel = "spring")
 public interface AnswerMapper {
-
-    default List<AnswerResponseDto> answersToAnswersResponseDtos(List<Answer> answers,
-                                                                 CommentService commentService) {
-        if (answers == null) {
-            return null;
-        }
-
-        List<AnswerResponseDto> list = new ArrayList<>(answers.size());
-        for (Answer answer : answers) {
-            list.add(answerToAnswerResponseDto(answer, commentService));
-        }
-
-        return list;
-    }
-
-
-    default AnswerResponseDto answerToAnswerResponseDto(Answer answer,
-                                                        CommentService commentService) {
-        AnswerResponseDto answerResponseDto = new AnswerResponseDto();
-
-        answerResponseDto.setAnswerId(answer.getAnswerId());
-        answerResponseDto.setCreatedAt(answer.getCreatedAt());
-        answerResponseDto.setModifiedAt(answer.getModifiedAt());
-        answerResponseDto.setContent(answer.getContent());
-        answerResponseDto.setVotes(answer.getVotes());
-
-        answerResponseDto.setUser(UserProfileResponse.from(answer.getUser()));
-
-        answerResponseDto.setComments(commentService.findCommentsByAnswer(answer));
-
-        return answerResponseDto;
-    }
 
     default AnswerCommentUserResponse answerToAnswerCommentUserResponseDto(Answer answer) {
         AnswerCommentUserResponse answerCommentUserResponse = new AnswerCommentUserResponse();

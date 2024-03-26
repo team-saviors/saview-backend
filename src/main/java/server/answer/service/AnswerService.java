@@ -1,6 +1,7 @@
 package server.answer.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,19 +9,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.answer.dto.AnswerPostRequest;
-import server.answer.dto.AnswerResponseDto;
+import server.answer.dto.AnswerResponse;
 import server.answer.entity.Answer;
 import server.answer.entity.Vote;
 import server.answer.mapper.AnswerMapper;
 import server.answer.repository.AnswerRepository;
 import server.answer.repository.VoteRepository;
-import server.comment.service.CommentService;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
 import server.question.service.QuestionService;
 import server.response.AnswerCommentUserResponse;
-import server.response.MultiResponseDto;
+import server.response.MultiResponse;
 import server.user.entity.Badge;
 import server.user.entity.User;
 import server.user.repository.BadgeRepository;
@@ -72,26 +72,28 @@ public class AnswerService {
                 );
     }
 
-    public MultiResponseDto<AnswerResponseDto> findAnswers(Question question,
-                                                           CommentService commentService,
-                                                           int page, int size, String sort) {
+    public MultiResponse<AnswerResponse> findAnswers(Question question, int page, int size, String sort) {
         try {
             Page<Answer> pageAnswers = answerRepository.findAllByQuestion(question,
                     PageRequest.of(page - 1, size, Sort.by(sort).descending()));
             List<Answer> answers = pageAnswers.getContent();
-            return new MultiResponseDto<>(answerMapper.answersToAnswersResponseDtos(answers, commentService),
-                    pageAnswers);
+
+            List<AnswerResponse> responses = answers.stream()
+                    .map(AnswerResponse::from)
+                    .collect(Collectors.toUnmodifiableList());
+
+            return new MultiResponse<>(responses, pageAnswers);
         } catch (Exception e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_SORT_PARAMETER);
         }
     }
 
-    public MultiResponseDto<AnswerCommentUserResponse> userInfoAnswers(User user,
-                                                                       int page, int size) {
+    public MultiResponse<AnswerCommentUserResponse> userInfoAnswers(User user,
+                                                                    int page, int size) {
         Page<Answer> pageAnswers = answerRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
         List<Answer> answers = pageAnswers.getContent();
-        return new MultiResponseDto<>(answerMapper.answersToAnswerCommentUserResponseDtos(answers), pageAnswers);
+        return new MultiResponse<>(answerMapper.answersToAnswerCommentUserResponseDtos(answers), pageAnswers);
     }
 
     public void verifiedVotes(long answerId, Long userId, int votes) {

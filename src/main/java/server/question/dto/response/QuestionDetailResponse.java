@@ -3,9 +3,9 @@ package server.question.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import server.answer.dto.AnswerResponseDto;
+import server.answer.dto.AnswerResponse;
 import server.question.entity.Question;
-import server.response.MultiResponseDto;
+import server.response.MultiResponse;
 import server.user.dto.response.UserProfileResponse;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -20,9 +20,9 @@ public class QuestionDetailResponse {
     String subCategory;
     int views;
     UserProfileResponse user;
-    MultiResponseDto<AnswerResponseDto> answers;
+    MultiResponse<AnswerResponse> answers;
 
-    public static QuestionDetailResponse of(Question question, MultiResponseDto<AnswerResponseDto> answers) {
+    public static QuestionDetailResponse of(Question question, MultiResponse<AnswerResponse> answers) {
         return QuestionDetailResponse.builder()
             .questionId(question.getQuestionId())
             .content(question.getContent())
