@@ -67,4 +67,8 @@ public class Answer extends Auditable {
     public void addUserBadgeScore(int addValue) {
         this.user.addBadgeScore(addValue);
     }
+
+    public void updateVotes(int votes) {
+        this.votes = votes;
+    }
 }

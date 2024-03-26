@@ -10,11 +10,11 @@ import server.question.entity.Question;
 @Getter
 public class AnswerCommentUserResponse {
 
-    private long questionId;
-    private String questionContent;
-    private String subCategory;
-    private LocalDateTime createdAt;
-    private String content;
+    private final long questionId;
+    private final String questionContent;
+    private final String subCategory;
+    private final LocalDateTime createdAt;
+    private final String content;
 
     private AnswerCommentUserResponse(long questionId,
                                       String questionContent,

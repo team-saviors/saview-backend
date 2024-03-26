@@ -11,18 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerResponse;
 import server.answer.entity.Answer;
-import server.answer.entity.Vote;
 import server.answer.repository.AnswerRepository;
-import server.answer.repository.VoteRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
 import server.question.service.QuestionService;
 import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponse;
-import server.user.entity.Badge;
 import server.user.entity.User;
-import server.user.repository.BadgeRepository;
 import server.user.service.UserService;
 
 @Service
@@ -33,8 +29,6 @@ public class AnswerService {
     public static final int ANSWER_BADGE_SCORE = 20;
 
     private final AnswerRepository answerRepository;
-    private final VoteRepository voteRepository;
-    private final BadgeRepository badgeRepository;
     private final QuestionService questionService;
     private final UserService userService;
 
@@ -96,23 +90,5 @@ public class AnswerService {
                 .collect(Collectors.toUnmodifiableList());
 
         return new MultiResponse<>(responses, pageAnswers);
-    }
-
-    public void verifiedVotes(long answerId, Long userId, int votes) {
-        if (!voteRepository.existsByAnswerIdAndUserId(answerId, userId)) {
-            answerRepository.updateVotes(votes, answerId);
-            Vote vote = Vote.builder().answerId(answerId).userId(userId).build();
-            voteRepository.save(vote);
-        } else {
-            throw new BusinessLogicException(ExceptionCode.DUPLICATE_VOTE);
-        }
-    }
-
-    public void addVotedScore(long answerId) {
-        User votedUser = answerRepository.findById(answerId)
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND)).getUser();
-
-        Badge badge = votedUser.getBadge();
-        badgeRepository.updateScore(badge.getScore() + 50, badge.getBadgeId());
     }
 }

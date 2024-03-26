@@ -1,14 +1,25 @@
 package server.question.controller;
 
+import java.net.URI;
+import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import server.answer.dto.AnswerResponse;
 import server.answer.service.AnswerService;
-import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
 import server.question.dto.ViewRequest;
 import server.question.dto.request.QuestionPostRequest;
@@ -18,11 +29,6 @@ import server.question.dto.response.QuestionListResponse;
 import server.question.entity.Question;
 import server.question.service.QuestionService;
 import server.response.MultiResponse;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import java.net.URI;
-import java.util.List;
 
 @Validated
 @RestController
@@ -88,17 +94,19 @@ public class QuestionController {
                                                                                       @Positive @RequestParam int page,
                                                                                       @Positive @RequestParam int size,
                                                                                       @RequestParam String sort) {
-        Page<Question> pageQuestions = questionService.findQuestionsByCategory(mainCategory, subCategory, page - 1, size, sort);
+        Page<Question> pageQuestions = questionService.findQuestionsByCategory(mainCategory, subCategory, page - 1,
+                size, sort);
         List<Question> questions = pageQuestions.getContent();
 
         return ResponseEntity.ok(new MultiResponse<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<MultiResponse<QuestionListResponse>> searchQuestion(@RequestParam(value = "keyword") String keyword,
-                                                                              @Positive @RequestParam int page,
-                                                                              @Positive @RequestParam int size,
-                                                                              @RequestParam String sort) {
+    public ResponseEntity<MultiResponse<QuestionListResponse>> searchQuestion(
+            @RequestParam(value = "keyword") String keyword,
+            @Positive @RequestParam int page,
+            @Positive @RequestParam int size,
+            @RequestParam String sort) {
         Page<Question> pageQuestions = questionService.search(keyword, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
 

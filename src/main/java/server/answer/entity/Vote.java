@@ -1,8 +1,16 @@
 package server.answer.entity;
 
-import lombok.*;
-
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import server.user.entity.User;
 
 @Entity
 @Getter
@@ -13,15 +21,17 @@ public class Vote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long voteId;
 
-    @Column(nullable = false)
-    private long answerId;
+    @ManyToOne
+    @JoinColumn(name = "answer_id", nullable = false)
+    private Answer answer;
 
-    @Column(nullable = false)
-    private long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Builder
-    public Vote(long answerId, long userId) {
-        this.answerId = answerId;
-        this.userId = userId;
+    private Vote(Answer answer, User user) {
+        this.answer = answer;
+        this.user = user;
     }
 }

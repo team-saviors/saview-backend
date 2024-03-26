@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerPutRequest;
-import server.answer.dto.VoteRequest;
 import server.answer.service.AnswerService;
 import server.jwt.oauth.PrincipalDetails;
 
@@ -39,22 +38,13 @@ public class AnswerController {
         return ResponseEntity.created(URI.create("/answers/" + answerId)).build();
     }
 
-    // todo: 왜 수정메서드는 사용자 인증이 없을까?
     @PutMapping("/answers/{answer-id}")
     public ResponseEntity<Void> putAnswer(@Positive @PathVariable("answer-id") long answerId,
-                                          @Valid @RequestBody AnswerPutRequest request) {
-        answerService.updateContent(answerId, request.getContent());
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/answers/{answer-id}/votes")
-    public ResponseEntity<Void> putVotes(@Positive @PathVariable("answer-id") long answerId,
-                                         @Valid @RequestBody VoteRequest request,
-                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
-
-        answerService.verifiedVotes(answerId, principalDetails.getUser().getUserId(), request.getVotes());
-        answerService.addVotedScore(answerId);
+                                          @Valid @RequestBody AnswerPutRequest request,
+                                          @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        answerService.updateContent(
+                answerId,
+                request.getContent());
 
         return ResponseEntity.ok().build();
     }
