@@ -12,7 +12,6 @@ import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerResponse;
 import server.answer.entity.Answer;
 import server.answer.entity.Vote;
-import server.answer.mapper.AnswerMapper;
 import server.answer.repository.AnswerRepository;
 import server.answer.repository.VoteRepository;
 import server.exception.BusinessLogicException;
@@ -34,7 +33,6 @@ public class AnswerService {
     public static final int ANSWER_BADGE_SCORE = 20;
 
     private final AnswerRepository answerRepository;
-    private final AnswerMapper answerMapper;
     private final VoteRepository voteRepository;
     private final BadgeRepository badgeRepository;
     private final QuestionService questionService;
@@ -93,7 +91,11 @@ public class AnswerService {
         Page<Answer> pageAnswers = answerRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
         List<Answer> answers = pageAnswers.getContent();
-        return new MultiResponse<>(answerMapper.answersToAnswerCommentUserResponseDtos(answers), pageAnswers);
+        List<AnswerCommentUserResponse> responses = answers.stream()
+                .map(AnswerCommentUserResponse::from)
+                .collect(Collectors.toUnmodifiableList());
+
+        return new MultiResponse<>(responses, pageAnswers);
     }
 
     public void verifiedVotes(long answerId, Long userId, int votes) {

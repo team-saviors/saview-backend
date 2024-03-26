@@ -3,12 +3,11 @@ package server.response;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.Getter;
-import lombok.Setter;
+import server.answer.entity.Answer;
 import server.comment.entity.Comment;
 import server.question.entity.Question;
 
 @Getter
-@Setter
 public class AnswerCommentUserResponse {
 
     private long questionId;
@@ -16,10 +15,6 @@ public class AnswerCommentUserResponse {
     private String subCategory;
     private LocalDateTime createdAt;
     private String content;
-
-    // todo: answer mapper 때문에 임시로 기본 생성자 놔뒀습니다.
-    public AnswerCommentUserResponse() {
-    }
 
     private AnswerCommentUserResponse(long questionId,
                                       String questionContent,
@@ -44,6 +39,20 @@ public class AnswerCommentUserResponse {
                 question.getSubCategory(),
                 comment.getCreatedAt(),
                 comment.getContent()
+        );
+    }
+
+    public static AnswerCommentUserResponse from(Answer answer) {
+        if (Objects.isNull(answer)) {
+            return null;
+        }
+        Question question = answer.getQuestion();
+        return new AnswerCommentUserResponse(
+                question.getQuestionId(),
+                question.getContent(),
+                question.getSubCategory(),
+                answer.getCreatedAt(),
+                answer.getContent()
         );
     }
 }
