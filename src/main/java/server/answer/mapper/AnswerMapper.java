@@ -3,7 +3,6 @@ package server.answer.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.Mapper;
-import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.entity.Answer;
 import server.comment.service.CommentService;
@@ -13,8 +12,6 @@ import server.user.dto.response.UserProfileResponse;
 
 @Mapper(componentModel = "spring")
 public interface AnswerMapper {
-
-    Answer answerPostPutDtoToAnswer(AnswerPostRequest answerPostPutDto);
 
     default List<AnswerResponseDto> answersToAnswersResponseDtos(List<Answer> answers,
                                                                  CommentService commentService) {

@@ -47,7 +47,7 @@ public class Answer extends Auditable {
     private User user;
 
     @OneToMany(mappedBy = "answer", cascade = CascadeType.REMOVE)
-    private List<Comment> comments = new ArrayList<>();
+    private final List<Comment> comments = new ArrayList<>();
 
     @Builder
     private Answer(String content, Question question, User user) {

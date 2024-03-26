@@ -11,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -39,6 +38,7 @@ public class Badge {
         this.score = score;
         this.level = level;
         this.badgeImg = badgeImg;
+        this.user = user;
     }
 
     public Badge(User user) {
