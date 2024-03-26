@@ -22,9 +22,9 @@ import javax.validation.constraints.Positive;
 import java.net.URI;
 
 @Validated
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Void> join(@Valid @RequestBody UserPostRequest userPostDto) {
-        User user = userService.createUser(userPostDto);
+        final User user = userService.createUser(userPostDto);
         return ResponseEntity.created(URI.create("/users/" + user.getUserId())).build();
     }
 

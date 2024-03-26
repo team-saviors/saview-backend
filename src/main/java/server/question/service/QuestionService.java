@@ -7,22 +7,26 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
+import server.question.dto.request.QuestionPostRequest;
 import server.question.dto.request.QuestionPutRequest;
 import server.question.entity.Question;
 import server.question.repository.QuestionRepository;
+import server.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final UserService userService;
 
-    public Long createdQuestion(Question question) {
-        return questionRepository.save(question).getQuestionId();
+    public Question createdQuestion(QuestionPostRequest questionPostRequest, String email) {
+        Question question = questionPostRequest.toEntity(userService.findUser(email));
+        return questionRepository.save(question);
     }
 
     public Question findQuestion(long questionId) {
@@ -49,7 +53,8 @@ public class QuestionService {
     }
 
     public void updateViews(long questionId, int views) {
-        questionRepository.updateViews(views, questionId);
+        Question question = findQuestion(questionId);
+        question.updateViews(views);
     }
 
     public Page<Question> findQuestionsByCategory(String mainCategory, String subCategory, int page, int size, String sort) {

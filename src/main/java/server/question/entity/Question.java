@@ -54,4 +54,8 @@ public class Question extends Auditable {
         this.mainCategory = questionPutRequest.getMainCategory();
         this.subCategory = questionPutRequest.getSubCategory();
     }
+
+    public void updateViews(int views) {
+        this.views = views;
+    }
 }

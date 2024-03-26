@@ -3,14 +3,13 @@ package server.question.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.service.AnswerService;
 import server.comment.service.CommentService;
+import server.jwt.oauth.PrincipalDetails;
 import server.question.dto.ViewRequest;
 import server.question.dto.request.QuestionPostRequest;
 import server.question.dto.request.QuestionPutRequest;
@@ -19,7 +18,6 @@ import server.question.dto.response.QuestionListResponse;
 import server.question.entity.Question;
 import server.question.service.QuestionService;
 import server.response.MultiResponseDto;
-import server.user.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -27,27 +25,20 @@ import java.net.URI;
 import java.util.List;
 
 @Validated
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/questions")
+@RequiredArgsConstructor
 public class QuestionController {
     private final QuestionService questionService;
-    private final UserService userService;
     private final AnswerService answerService;
     private final CommentService commentService;
 
     @PostMapping
     public ResponseEntity<Void> postQuestion(@Valid @RequestBody QuestionPostRequest questionPostRequest,
-                                             Authentication authentication) {
+                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        final Question question = questionService.createdQuestion(questionPostRequest, principalDetails.getUsername());
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-
-        Question question = questionPostRequest.toEntity(userService.findUser(email));
-
-        final Long questionId = questionService.createdQuestion(question);
-
-        return ResponseEntity.created(URI.create("/questions/" + questionId)).build();
+        return ResponseEntity.created(URI.create("/questions/" + question.getQuestionId())).build();
     }
 
     @GetMapping("/{question-id}")
@@ -61,7 +52,6 @@ public class QuestionController {
     }
 
     @GetMapping
-    @Transactional(readOnly = true)
     public ResponseEntity<MultiResponseDto<QuestionListResponse>> getQuestions(@Positive @RequestParam int page,
                                                                                @Positive @RequestParam int size) {
         Page<Question> pageQuestions = questionService.findQuestions(page - 1, size);
@@ -94,7 +84,6 @@ public class QuestionController {
     }
 
     @GetMapping("/tags")
-    @Transactional(readOnly = true)
     public ResponseEntity<MultiResponseDto<QuestionListResponse>> getQuestionsByCategory(@RequestParam String mainCategory,
                                                                                          @RequestParam String subCategory,
                                                                                          @Positive @RequestParam int page,
@@ -113,6 +102,7 @@ public class QuestionController {
                                                                                  @RequestParam String sort) {
         Page<Question> pageQuestions = questionService.search(keyword, page - 1, size, sort);
         List<Question> questions = pageQuestions.getContent();
+
         return ResponseEntity.ok(new MultiResponseDto<>(QuestionListResponse.fromQuestions(questions), pageQuestions));
     }
 }
