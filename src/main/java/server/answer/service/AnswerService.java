@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import server.answer.dto.AnswerResponseDto;
 import server.answer.entity.Answer;
 import server.answer.entity.Vote;
@@ -24,8 +25,9 @@ import server.user.repository.BadgeRepository;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class AnswerService {
 
     private final AnswerRepository answerRepository;

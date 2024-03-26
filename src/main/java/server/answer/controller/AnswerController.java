@@ -25,8 +25,8 @@ import javax.validation.constraints.Positive;
 import java.net.URI;
 
 @Validated
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 public class AnswerController {
 
     private final AnswerService answerService;

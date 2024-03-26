@@ -25,9 +25,9 @@ import server.response.MultiResponseDto;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
 
-@RequiredArgsConstructor
-@Transactional
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class CommentService {
 
     public static final int COMMENT_BADGE_SCORE = 10;
