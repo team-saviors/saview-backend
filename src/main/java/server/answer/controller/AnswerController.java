@@ -1,75 +1,50 @@
 package server.answer.controller;
 
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import server.answer.dto.AnswerPostPutDto;
-import server.answer.dto.AnswerResponseDto;
-import server.answer.dto.VotesDto;
-import server.answer.entity.Answer;
-import server.answer.mapper.AnswerMapper;
-import server.answer.service.AnswerService;
-import server.comment.service.CommentService;
-import server.jwt.oauth.PrincipalDetails;
-import server.question.service.QuestionService;
-import server.user.entity.User;
-import server.user.service.UserService;
-
+import java.net.URI;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.net.URI;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import server.answer.dto.AnswerPostRequest;
+import server.answer.dto.AnswerPutRequest;
+import server.answer.service.AnswerService;
+import server.jwt.oauth.PrincipalDetails;
 
 @Validated
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 public class AnswerController {
 
     private final AnswerService answerService;
-    private final AnswerMapper answerMapper;
-    private final QuestionService questionService;
-    private final UserService userService;
-    private final CommentService commentService;
 
     @PostMapping("/questions/{question-id}/answers")
     public ResponseEntity<Void> postAnswer(@Positive @PathVariable("question-id") long questionId,
-                                           @Valid @RequestBody AnswerPostPutDto answerPostPutDto,
-                                           Authentication authentication) {
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-
-        Answer answer = answerMapper.answerPostPutDtoToAnswer(answerPostPutDto);
-        answer.setQuestion(questionService.findVerifiedQuestion(questionId));
-        User user = userService.findUser(email);
-        answerService.addAnswerScore(user.getBadge());
-        answer.setUser(user);
-
-        final Long answerId = answerService.createdAnswer(answer);
+                                           @Valid @RequestBody AnswerPostRequest request,
+                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        final Long answerId = answerService.createdAnswer(
+                request,
+                questionId,
+                principalDetails.getUsername());
 
         return ResponseEntity.created(URI.create("/answers/" + answerId)).build();
     }
 
     @PutMapping("/answers/{answer-id}")
     public ResponseEntity<Void> putAnswer(@Positive @PathVariable("answer-id") long answerId,
-                                          @Valid @RequestBody AnswerPostPutDto answerPostPutDto) {
-        Answer answer = answerMapper.answerPostPutDtoToAnswer(answerPostPutDto);
-        answer.setAnswerId(answerId);
-        answerService.updateAnswer(answer);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/answers/{answer-id}/votes")
-    public ResponseEntity<Void> putVotes(@Positive @PathVariable("answer-id") long answerId,
-                                         @Valid @RequestBody VotesDto votesDto,
-                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        answerService.verifiedVotes(answerId, principalDetails.getUser().getUserId(), votesDto.getVotes());
-        answerService.addVotedScore(answerId);
+                                          @Valid @RequestBody AnswerPutRequest request,
+                                          @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        answerService.updateContent(
+                answerId,
+                request);
 
         return ResponseEntity.ok().build();
     }
@@ -80,13 +55,4 @@ public class AnswerController {
 
         return ResponseEntity.noContent().build();
     }
-
-    @GetMapping("/test/{answer-id}")
-    public ResponseEntity<AnswerResponseDto> test(@PathVariable("answer-id") long answerId) {
-        Answer answer = answerService.findVerifiedAnswer(answerId);
-
-        return ResponseEntity.ok(answerMapper.answerToAnswerResponseDto(answer, commentService));
-    }
-
-
 }

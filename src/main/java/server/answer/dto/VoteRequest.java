@@ -5,7 +5,7 @@ import lombok.Getter;
 import javax.validation.constraints.PositiveOrZero;
 
 @Getter
-public class VotesDto {
+public class VoteRequest {
 
     @PositiveOrZero
     private int votes;
