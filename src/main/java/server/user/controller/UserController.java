@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import server.answer.entity.Answer;
 import server.answer.service.AnswerService;
 import server.comment.entity.Comment;
 import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
-import server.response.MultiResponse;
 import server.user.dto.request.PasswordRequest;
 import server.user.dto.request.UserPostRequest;
 import server.user.dto.request.UserPutRequest;
@@ -80,9 +80,9 @@ public class UserController {
                                                                @Positive @RequestParam int page,
                                                                @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
-        return ResponseEntity.ok(UserAnswersResponse.from(answerService.userInfoAnswers(findUser, page, size)));
+        Page<Answer> answers = answerService.findAnswersByUser(findUser, page, size);
+        return ResponseEntity.ok(UserAnswersResponse.from(answers));
     }
-
 
     // UserInfo Page Comments
     @GetMapping("/{user-id}/user-comments")
@@ -91,6 +91,6 @@ public class UserController {
                                                                  @Positive @RequestParam int size) {
         User findUser = userService.findUserById(userId);
         Page<Comment> comments = commentService.findCommentsByUser(findUser, page, size);
-        return ResponseEntity.ok(UserCommentsResponse.from(MultiResponse.from(comments)));
+        return ResponseEntity.ok(UserCommentsResponse.from(comments));
     }
 }

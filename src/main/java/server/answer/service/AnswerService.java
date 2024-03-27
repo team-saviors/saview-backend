@@ -18,7 +18,6 @@ import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
 import server.question.repository.QuestionRepository;
-import server.response.AnswerCommentUserResponse;
 import server.response.MultiResponse;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
@@ -89,16 +88,10 @@ public class AnswerService {
         }
     }
 
-
-    public MultiResponse<AnswerCommentUserResponse> userInfoAnswers(User user,
-                                                                    int page, int size) {
-        Page<Answer> pageAnswers = answerRepository.findAllByUser(user,
+    public Page<Answer> findAnswersByUser(User user,
+                                          int page,
+                                          int size) {
+        return answerRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
-        List<Answer> answers = pageAnswers.getContent();
-        List<AnswerCommentUserResponse> responses = answers.stream()
-                .map(AnswerCommentUserResponse::from)
-                .collect(Collectors.toUnmodifiableList());
-
-        return new MultiResponse<>(responses, pageAnswers);
     }
 }
