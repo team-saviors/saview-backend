@@ -1,13 +1,16 @@
 package server.answer.dto;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import server.answer.entity.Answer;
 import server.comment.dto.CommentResponse;
+import server.comment.entity.Comment;
 import server.user.dto.response.UserProfileResponse;
 
 @Getter
@@ -29,11 +32,16 @@ public class AnswerResponse {
                 .createdAt(answer.getCreatedAt())
                 .modifiedAt(answer.getModifiedAt())
                 .user(UserProfileResponse.from(answer.getUser()))
-                .comments(
-                        answer.getComments().stream()
-                                .map(CommentResponse::from)
-                                .collect(Collectors.toUnmodifiableList()))
+                .comments(createComments(answer.getComments()))
                 .build();
+    }
 
+    private static List<CommentResponse> createComments(List<Comment> comments) {
+        if (Objects.isNull(comments)) {
+            return Collections.emptyList();
+        }
+        return comments.stream()
+                .map(CommentResponse::from)
+                .collect(Collectors.toList());
     }
 }

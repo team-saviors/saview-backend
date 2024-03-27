@@ -1,8 +1,6 @@
 package server.answer.service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,14 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.answer.dto.AnswerPostRequest;
 import server.answer.dto.AnswerPutRequest;
-import server.answer.dto.AnswerResponse;
 import server.answer.entity.Answer;
 import server.answer.repository.AnswerRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
 import server.question.repository.QuestionRepository;
-import server.response.MultiResponse;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
 
@@ -28,6 +24,7 @@ import server.user.repository.UserRepository;
 public class AnswerService {
 
     public static final int ANSWER_BADGE_SCORE = 20;
+    public static final String SORT_PROPERTY = "answerId";
 
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
@@ -70,19 +67,13 @@ public class AnswerService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
     }
 
-    public MultiResponse<AnswerResponse> findAnswers(Question question,
-                                                     int page,
-                                                     int size,
-                                                     String sort) {
+    public Page<Answer> findAnswersByQuestion(Question question,
+                                              int page,
+                                              int size,
+                                              String sort) {
         try {
-            Page<Answer> pageAnswers = answerRepository.findAllByQuestion(question,
+            return answerRepository.findAllByQuestion(question,
                     PageRequest.of(page - 1, size, Sort.by(sort).descending()));
-            List<Answer> answers = pageAnswers.getContent();
-            List<AnswerResponse> responses = answers.stream()
-                    .map(AnswerResponse::from)
-                    .collect(Collectors.toUnmodifiableList());
-
-            return new MultiResponse<>(responses, pageAnswers);
         } catch (Exception e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_SORT_PARAMETER);
         }
@@ -92,6 +83,6 @@ public class AnswerService {
                                           int page,
                                           int size) {
         return answerRepository.findAllByUser(user,
-                PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
+                PageRequest.of(page - 1, size, Sort.by(SORT_PROPERTY).descending()));
     }
 }

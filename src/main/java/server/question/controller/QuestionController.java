@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import server.answer.dto.AnswerResponse;
+import server.answer.entity.Answer;
 import server.answer.service.AnswerService;
 import server.jwt.oauth.PrincipalDetails;
 import server.question.dto.ViewRequest;
@@ -32,8 +33,8 @@ import server.response.MultiResponse;
 
 @Validated
 @RestController
-@RequestMapping("/questions")
 @RequiredArgsConstructor
+@RequestMapping("/questions")
 public class QuestionController {
     private final QuestionService questionService;
     private final AnswerService answerService;
@@ -47,12 +48,14 @@ public class QuestionController {
     }
 
     @GetMapping("/{question-id}")
+    @Transactional
     public ResponseEntity<QuestionDetailResponse> getQuestion(@Positive @RequestParam int page,
                                                               @Positive @RequestParam int size,
                                                               @RequestParam String sort,
                                                               @Positive @PathVariable("question-id") long questionId) {
         Question question = questionService.findQuestion(questionId);
-        MultiResponse<AnswerResponse> answers = answerService.findAnswers(question, page, size, sort);
+        Page<Answer> answers = answerService.findAnswersByQuestion(question, page, size, sort);
+
         return ResponseEntity.ok(QuestionDetailResponse.of(question, answers));
     }
 
