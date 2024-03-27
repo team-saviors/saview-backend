@@ -83,7 +83,6 @@ public class UserService {
         refreshTokenRepository.deleteByEmail(email);
     }
 
-
     private User findVerifiedUser(long userId) {
         Optional<User> user = userRepository.findById(userId);
         return user.orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));

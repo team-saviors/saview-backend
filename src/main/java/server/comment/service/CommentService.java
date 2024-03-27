@@ -1,10 +1,6 @@
 package server.comment.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,16 +8,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import server.answer.entity.Answer;
-import server.answer.service.AnswerService;
+import server.answer.repository.AnswerRepository;
 import server.comment.dto.CommentPostRequest;
 import server.comment.dto.CommentPutRequest;
-import server.comment.dto.CommentResponse;
 import server.comment.entity.Comment;
 import server.comment.repository.CommentRepository;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
-import server.response.AnswerCommentUserResponse;
-import server.response.MultiResponse;
 import server.user.entity.User;
 import server.user.repository.UserRepository;
 
@@ -34,13 +27,15 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final AnswerService answerService;
+    private final AnswerRepository answerRepository;
 
     public Long createComment(CommentPostRequest request, Long answerId, String email) {
         User user = Optional.ofNullable(userRepository.findByEmail(email))
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
+        Answer answer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
+
         user.addBadgeScore(COMMENT_BADGE_SCORE);
-        Answer answer = answerService.findVerifiedAnswer(answerId);
         Comment comment = request.toEntity(answer, user);
 
         commentRepository.save(comment);
@@ -62,28 +57,8 @@ public class CommentService {
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
     }
 
-    public List<CommentResponse> findCommentsByAnswer(Answer answer) {
-        List<Comment> comments = commentRepository.findAllByAnswer(answer);
-
-        if (Objects.isNull(comments)) {
-            return Collections.emptyList();
-        }
-
-        return comments.stream()
-                .map(CommentResponse::from)
-                .collect(Collectors.toUnmodifiableList());
-    }
-
-    public MultiResponse<AnswerCommentUserResponse> userInfoComments(User user,
-                                                                     int page, int size) {
-        Page<Comment> pageComments = commentRepository.findAllByUser(user,
+    public Page<Comment> findCommentsByUser(User user, int page, int size) {
+        return commentRepository.findAllByUser(user,
                 PageRequest.of(page - 1, size, Sort.by("commentId").descending()));
-        List<Comment> comments = pageComments.getContent();
-
-        List<AnswerCommentUserResponse> responses = comments.stream()
-                .map(AnswerCommentUserResponse::from)
-                .collect(Collectors.toList());
-
-        return new MultiResponse<>(responses, pageComments);
     }
 }

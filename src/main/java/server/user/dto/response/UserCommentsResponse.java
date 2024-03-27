@@ -12,7 +12,9 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE)
 @AllArgsConstructor(access = PRIVATE)
 public class UserCommentsResponse {
+
     MultiResponse<AnswerCommentUserResponse> myPosts;
+
     public static UserCommentsResponse from(MultiResponse<AnswerCommentUserResponse> myPosts) {
         return new UserCommentsResponse(myPosts);
     }

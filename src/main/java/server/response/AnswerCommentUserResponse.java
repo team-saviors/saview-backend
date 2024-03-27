@@ -7,6 +7,7 @@ import server.answer.entity.Answer;
 import server.comment.entity.Comment;
 import server.question.entity.Question;
 
+//todo: 분리
 @Getter
 public class AnswerCommentUserResponse {
 

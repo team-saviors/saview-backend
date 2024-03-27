@@ -44,7 +44,7 @@ public class AnswerController {
                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
         answerService.updateContent(
                 answerId,
-                request.getContent());
+                request);
 
         return ResponseEntity.ok().build();
     }
