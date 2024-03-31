@@ -1,13 +1,10 @@
 package server.answer.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.validation.constraints.NotBlank;
+import lombok.Getter;
 
 @Getter
-@Setter
-public class AnswerPostPutDto {
+public class AnswerPutRequest {
 
     @NotBlank(message = "내용을 입력해주세요.")
     private String content;

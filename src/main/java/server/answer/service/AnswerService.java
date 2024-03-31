@@ -1,46 +1,60 @@
 package server.answer.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import server.answer.dto.AnswerResponseDto;
+import org.springframework.transaction.annotation.Transactional;
+import server.answer.dto.AnswerPostRequest;
+import server.answer.dto.AnswerPutRequest;
 import server.answer.entity.Answer;
-import server.answer.entity.Vote;
-import server.answer.mapper.AnswerMapper;
 import server.answer.repository.AnswerRepository;
-import server.answer.repository.VoteRepository;
-import server.comment.service.CommentService;
 import server.exception.BusinessLogicException;
 import server.exception.ExceptionCode;
 import server.question.entity.Question;
-import server.response.AnswerCommentUserResponse;
-import server.response.MultiResponseDto;
-import server.user.entity.Badge;
+import server.question.repository.QuestionRepository;
 import server.user.entity.User;
-import server.user.repository.BadgeRepository;
+import server.user.repository.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
-
-@RequiredArgsConstructor
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class AnswerService {
 
-    private final AnswerRepository answerRepository;
-    private final AnswerMapper answerMapper;
-    private final VoteRepository voteRepository;
-    private final BadgeRepository badgeRepository;
+    public static final int ANSWER_BADGE_SCORE = 20;
+    public static final String SORT_PROPERTY = "answerId";
 
-    public Long createdAnswer(Answer answer) {
+    private final AnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
+    private final UserRepository userRepository;
+
+    public Long createdAnswer(AnswerPostRequest request,
+                              Long questionId,
+                              String email) {
+        Question question = findQuestionById(questionId);
+        User user = findVerifiedUserByEmail(email);
+        Answer answer = request.toEntity(user, question);
+        answer.addUserBadgeScore(ANSWER_BADGE_SCORE);
+
         return answerRepository.save(answer).getAnswerId();
     }
 
-    public void updateAnswer(Answer answer) {
-        Answer findAnswer = findVerifiedAnswer(answer.getAnswerId());
-        findAnswer.setContent(answer.getContent());
-        answerRepository.save(findAnswer);
+    private Question findQuestionById(Long questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.QUESTION_NOT_FOUND));
+    }
+
+    private User findVerifiedUserByEmail(String email) {
+        Optional<User> user = Optional.ofNullable(userRepository.findByEmail(email));
+        return user.orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
+    }
+
+
+    public void updateContent(Long answerId, AnswerPutRequest request) {
+        Answer answer = findVerifiedAnswer(answerId);
+        answer.updateContent(request.getContent());
     }
 
     public void deleteAnswer(long answerId) {
@@ -48,51 +62,27 @@ public class AnswerService {
         answerRepository.delete(findAnswer);
     }
 
-    public Answer findVerifiedAnswer(long answerId) {
-        Optional<Answer> answer = answerRepository.findById(answerId);
-        return answer.orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
+    private Answer findVerifiedAnswer(long answerId) {
+        return answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND));
     }
 
-    public MultiResponseDto<AnswerResponseDto> findAnswers(Question question,
-                                                           CommentService commentService,
-                                                           int page, int size, String sort) {
+    public Page<Answer> findAnswersByQuestion(Question question,
+                                              int page,
+                                              int size,
+                                              String sort) {
         try {
-            Page<Answer> pageAnswers = answerRepository.findAllByQuestion(question, PageRequest.of(page - 1, size, Sort.by(sort).descending()));
-            List<Answer> answers = pageAnswers.getContent();
-            return new MultiResponseDto<>(answerMapper.answersToAnswersResponseDtos(answers, commentService), pageAnswers);
+            return answerRepository.findAllByQuestion(question,
+                    PageRequest.of(page - 1, size, Sort.by(sort).descending()));
         } catch (Exception e) {
             throw new BusinessLogicException(ExceptionCode.INVALID_SORT_PARAMETER);
         }
     }
 
-    public MultiResponseDto<AnswerCommentUserResponse> userInfoAnswers(User user,
-                                                                       int page, int size) {
-        Page<Answer> pageAnswers = answerRepository.findAllByUser(user, PageRequest.of(page - 1, size, Sort.by("answerId").descending()));
-        List<Answer> answers = pageAnswers.getContent();
-        return new MultiResponseDto<>(answerMapper.answersToAnswerCommentUserResponseDtos(answers), pageAnswers);
-    }
-
-
-    public void verifiedVotes(long answerId, Long userId, int votes) {
-        if (!voteRepository.existsByAnswerIdAndUserId(answerId, userId)) {
-            answerRepository.updateVotes(votes, answerId);
-            Vote vote = Vote.builder().answerId(answerId).userId(userId).build();
-            voteRepository.save(vote);
-        } else {
-            throw new BusinessLogicException(ExceptionCode.DUPLICATE_VOTE);
-        }
-    }
-
-    public void addAnswerScore(Badge badge) {
-        int score = badge.getScore();
-        badgeRepository.updateScore(score + 20, badge.getBadgeId());
-    }
-
-    public void addVotedScore(long answerId) {
-        User votedUser = answerRepository.findById(answerId)
-                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.ANSWER_NOT_FOUND)).getUser();
-
-        Badge badge = votedUser.getBadge();
-        badgeRepository.updateScore(badge.getScore() + 50, badge.getBadgeId());
+    public Page<Answer> findAnswersByUser(User user,
+                                          int page,
+                                          int size) {
+        return answerRepository.findAllByUser(user,
+                PageRequest.of(page - 1, size, Sort.by(SORT_PROPERTY).descending()));
     }
 }

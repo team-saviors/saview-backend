@@ -19,8 +19,8 @@ import server.comment.service.CommentService;
 import server.jwt.oauth.PrincipalDetails;
 
 @Validated
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
