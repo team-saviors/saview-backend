@@ -32,7 +32,7 @@ import static org.mockito.Mockito.times;
 import static server.user.entity.User.UserStatus.USER_QUIT;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("NonAsciiCharacters")
+@SuppressWarnings("NonAsciiCharacters") // 한글 함수명을 쓰기 위함
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class UserServiceTest {
 
