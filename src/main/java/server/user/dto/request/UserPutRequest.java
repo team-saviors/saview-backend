@@ -1,11 +1,13 @@
 package server.user.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Getter
+@Builder
 public class UserPutRequest {
     @NotBlank(message = "닉네임은 반드시 입력해야합니다.")
     @Pattern(regexp = "(?=^[a-zA-Z0-9가-힣]+(\\s[a-zA-Z0-9가-힣]+)*$).{1,10}",

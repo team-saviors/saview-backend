@@ -1,5 +1,6 @@
 package server.user.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 import server.user.entity.User;
 
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Getter
+@Builder
 public class UserPostRequest {
 
     @NotBlank(message = "비밀번호는 반드시 입력해야합니다.")
