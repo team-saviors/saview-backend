@@ -21,6 +21,9 @@ import server.user.entity.User;
 @SuppressWarnings("NonAsciiCharacters")
 class CommentServiceTest extends ServiceTest {
 
+    public static final long INVALID_ANSWER_ID = -1L;
+    public static final long INVALID_COMMENT_ID = -1L;
+
     @Autowired
     private CommentService commentService;
 
@@ -48,7 +51,6 @@ class CommentServiceTest extends ServiceTest {
     void 코멘트_생성_시_답변이_존재_하지_않으면_예외_발생() {
         // given
         User user = saveUser();
-        long invalidAnswerId = -1;
 
         CommentPostRequest request = CommentPostRequest.builder()
                 .content("답변 내용 이다!")
@@ -58,7 +60,7 @@ class CommentServiceTest extends ServiceTest {
         assertThatThrownBy(
                 () -> commentService.createComment(
                         request,
-                        invalidAnswerId,
+                        INVALID_ANSWER_ID,
                         user.getEmail()
                 )).isInstanceOf(BusinessLogicException.class)
                 .hasMessageContaining(ExceptionCode.ANSWER_NOT_FOUND.getMessage());
@@ -126,8 +128,6 @@ class CommentServiceTest extends ServiceTest {
     @Test
     void 존재하지_않는_코멘트_수정_요청_시_예외_발생() {
         // given
-        long invalidCommentId = -1;
-
         CommentPutRequest request = CommentPutRequest.builder()
                 .content("답변 내용 수정할래요.")
                 .build();
@@ -135,7 +135,7 @@ class CommentServiceTest extends ServiceTest {
         // when, then
         assertThatThrownBy(
                 () -> commentService.updateComment(
-                        invalidCommentId,
+                        INVALID_COMMENT_ID,
                         request
                 )).isInstanceOf(BusinessLogicException.class)
                 .hasMessageContaining(ExceptionCode.COMMENT_NOT_FOUND.getMessage());
@@ -158,11 +158,9 @@ class CommentServiceTest extends ServiceTest {
     @Test
     void 존재하지_않는_코멘트_삭제_요청_시_예외_발생() {
         // given
-        long invalidCommentId = -1;
-
         // when, then
         assertThatThrownBy(
-                () -> commentService.deleteComment(invalidCommentId))
+                () -> commentService.deleteComment(INVALID_COMMENT_ID))
                 .isInstanceOf(BusinessLogicException.class)
                 .hasMessageContaining(ExceptionCode.COMMENT_NOT_FOUND.getMessage());
     }
