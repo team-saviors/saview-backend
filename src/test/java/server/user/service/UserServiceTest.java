@@ -92,7 +92,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 존재하는_이메일이면_해당_유저를_반환한다() {
+    void 존재하는_이메일로_사용자_조회_시_해당_유저를_반환한다() {
         // Given
         String email = "saview@gmail.com";
         User user = UserFixture.createUser(email);
@@ -108,7 +108,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 존재하지_않는_이메일이면_USER_NOT_FOUND가_반환된다() {
+    void 존재하지_않는_이메일로_사용자_조회_시_USER_NOT_FOUND가_반환된다() {
         // Given
         given(userRepository.findByEmail(NON_EXISTED_EMAIL)).willThrow(new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
 
@@ -119,7 +119,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 존재하는_유저ID일_경우_해당_유저를_반환한다() {
+    void 존재하는_유저ID로_사용자를_조회할_경우_해당_유저를_반환한다() {
         // Given
         String email = "saview@gmail.com";
         User user = UserFixture.createUser(email);
@@ -169,7 +169,7 @@ class UserServiceTest {
     }
 
     @Test
-    void 존재하는_이메일이면_해당_유저의_비밀번호를_입력받은_임시비밀번호로_변경한다() {
+    void 주어진_이메일에_해당하는_유저의_비밀번호를_주어진_임시_비밀번호로_변경한다() {
         // Given
         String email = "saview@gmail.com";
         String password = "saview!@#";

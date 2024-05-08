@@ -10,6 +10,7 @@ public class UserFixture {
             .nickname("nickname")
             .build();
     }
+
     public static User createUser(String email, String password) {
         return User.builder()
             .email(email)
@@ -17,6 +18,7 @@ public class UserFixture {
             .nickname("nickname")
             .build();
     }
+
     public static User createUser(String email, String password, String nickname) {
         return User.builder()
             .email(email)
