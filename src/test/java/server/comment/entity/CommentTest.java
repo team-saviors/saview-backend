@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import server.exception.BusinessLogicException;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@SuppressWarnings("NonAsciiCharacters")
 class CommentTest {
 
     @Test
@@ -45,7 +44,7 @@ class CommentTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    void 댓글_내용_수정_실패(String content) {
+    void 댓글_내용이_NULL_또는_공백일_경우_수정_실패(String content) {
         Comment comment = Comment.builder()
                 .content("궁금 합니다.")
                 .user(유저_성연)

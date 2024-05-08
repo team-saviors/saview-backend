@@ -18,7 +18,6 @@ import server.exception.ExceptionCode;
 import server.question.entity.Question;
 import server.user.entity.User;
 
-@SuppressWarnings("NonAsciiCharacters")
 class CommentServiceTest extends ServiceTest {
 
     public static final long INVALID_ANSWER_ID = -1L;
@@ -28,7 +27,7 @@ class CommentServiceTest extends ServiceTest {
     private CommentService commentService;
 
     @Test
-    void 코멘트_생성_성공() {
+    void 답변에_대한_코멘트_생성_성공() {
         // given
         User user = saveUser();
         Question question = saveQuestion(user);
