@@ -45,7 +45,7 @@ public class Comment extends Auditable {
     }
 
     public void updateContent(String content) {
-        if (content.isEmpty() || content.isBlank()) {
+        if (content == null || content.isBlank()) {
             throw new BusinessLogicException(ExceptionCode.BLANK_CONTENT);
         }
 

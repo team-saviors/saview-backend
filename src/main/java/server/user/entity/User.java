@@ -102,4 +102,8 @@ public class User extends Auditable {
     public void addBadgeScore(int addValue) {
         this.badge.addScore(addValue);
     }
+
+    public int getScore() {
+        return this.badge.getScore();
+    }
 }
