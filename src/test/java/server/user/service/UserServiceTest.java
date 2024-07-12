@@ -23,8 +23,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.anyLong;
@@ -81,7 +80,7 @@ class UserServiceTest {
         User user = UserFixture.createUser(email);
 
         given(userRepository.findByEmail(email)).willReturn(user);
-        given(bCryptPasswordEncoder.matches(anyString(), user.getPassword())).willReturn(true);
+        given(bCryptPasswordEncoder.matches(anyString(), eq(user.getPassword()))).willReturn(true);
 
         // When
         userService.updatePassword(email, "saview!@#", "newSaview$%^");
