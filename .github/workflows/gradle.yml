@@ -20,6 +20,8 @@ jobs:
     permissions:
       contents: write
       checks: write
+      issues: write
+      pull-requests: write
 
     steps:
     - uses: actions/checkout@v4
